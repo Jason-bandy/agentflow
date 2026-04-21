@@ -14,7 +14,7 @@
         "写入 /tmp/agentflow/id_output.json"
       ],
       "priority": 1,
-      "passes": false
+      "passes": true
     },
     {
       "id": "ID-002",
@@ -27,7 +27,7 @@
         "CMF 方案通过自检"
       ],
       "priority": 2,
-      "passes": false
+      "passes": true
     },
     {
       "id": "ID-003",
@@ -39,7 +39,7 @@
         "完成后打印 DONE:ID"
       ],
       "priority": 3,
-      "passes": false
+      "passes": true
     }
   ]
 }
