@@ -6,9 +6,12 @@ Started: 2026-04-21
 - 所有 Agent 产出统一写入 /tmp/agentflow/ 目录
 - sop-flow.jsonl 是 JSONL 格式，每行一个合法 JSON 对象
 - agents.json 中的现有 Agent（main, aftersale, sales 等）是通知系统配置，与 SOP 流程 Agent 是两套体系
-- launch-agents.sh 使用 tmux 窗口管理各 Agent，通过文件轮询实现依赖等待
+- launch-agents.sh 使用 tmux 窗口管理各 Agent，通过文件轮询(grep -q)实现依赖等待
 - Ralph 为每个 Agent 维护独立目录结构：scripts/ralph/<agent-id>/prd.json + progress.txt
 - 各 Agent 的 branchName 格式：ralph/sop-refactor/<agent-dir>（如 ralph/sop-refactor/pm）
+- tmux 窗口名使用简化 ID（如 hw-lead, me-manager），不带 "-agent" 后缀
+- US-001 到 US-011 的 acceptance criteria 大多已通过 US-001 的 14-step sop-flow.jsonl 重构实现
+- 验证 US 完成状态时，优先检查 sop-flow.jsonl、agents.json、.env.example、Ralph 目录是否存在对应定义
 ---
 ## [2026-04-21] - US-004
 - Verified architect-agent is fully defined in sop-flow.jsonl (step 5) with complete prompt_template covering system architecture, HW-SW interface spec, communication protocols, data storage, and security
@@ -91,4 +94,28 @@ Started: 2026-04-21
 - output_file: /tmp/agentflow/hw_output.json — matches original requirement
 - **Learnings for future iterations:**
   - HW responsibilities were split across two agents: hw-lead (BOM, firmware version, interfaces) and hw-board-app (PCB layout, signal integrity, EMC/EMI)
+---
+## [2026-04-21] - US-003
+- Verified app-lead-agent (step 9), fw-lead-agent (step 8), backend-agent (step 10) in sop-flow.jsonl — all have independent prompt_templates, output_files, triggers
+- fw-lead: 固件架构/驱动/通信协议栈/OTA/功耗优化 — trigger: DONE:HW_LEAD,DONE:ARCHITECT — output: fw_output.json
+- app-lead: 技术选型/UI组件/API调用层/设备连接/数据持久化 — trigger: DONE:ARCHITECT — output: app_output.json
+- backend: 技术栈/API服务/数据库Schema/认证授权/设备管理 — trigger: DONE:ARCHITECT — output: backend_output.json
+- agents.json entries already configured with correct dependency chains
+- Ralph directories created: fw/, app/, backend/
+- **Learnings for future iterations:**
+  - FW lead has dual dependency on HW_LEAD + ARCHITECT; App/Backend only depend on ARCHITECT — FW needs both hardware and architecture specs
+---
+## [2026-04-21] - US-012
+- Rewrote launch-agents.sh from old 6-agent flow (pm/hw/sw/prod/procurement/qa) to new 5-phase 14-agent flow
+- Phase 1 (serial): pm → id → me-manager → me-lead with DONE:PM/DONE:ID/DONE:ME_MANAGER/DONE:ME_LEAD chain
+- Phase 2: architect (wait ME_LEAD) → hw-lead (wait ARCHITECT) → hw-board (wait HW_LEAD)
+- Phase 3 (parallel): fw-lead, app-lead, backend, procurement — each with correct dual/single dependency waits
+- Phase 4 (parallel): verification (5 DONEs), qa (5 DONEs) with grep-based polling
+- Phase 5: production (wait DONE:VERIFICATION + DONE:QA)
+- Each agent window: file-poll grep loop → echo confirmation → claude --print prompt → tee output → completion echo
+- Added phase flow visualization in final echo output
+- Files changed: scripts/launch-agents.sh
+- **Learnings for future iterations:**
+  - Agent window names are shortened (hw-lead → "hw-lead", me-manager → "me-manager") — don't use the full agent-id suffix "-agent" for tmux window names
+  - The production window triggers push-risk-summary.sh at the very end — ensure this script exists before running
 ---

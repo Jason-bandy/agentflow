@@ -118,8 +118,8 @@
         "输出文件：app_output.json, fw_output.json, backend_output.json"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": "这是最大的改动，需要仔细处理依赖关系"
+      "passes": true,
+      "notes": "最大的改动已由 US-001 完成 — 三个 Agent 各自有独立 prompt/output/trigger/依赖"
     },
     {
       "id": "US-006",
@@ -132,8 +132,8 @@
         "通知渠道占位符配置"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": "Phase 5 的 Agent，依赖 QA 完成"
+      "passes": true,
+      "notes": "Phase 5 的 Agent — 已由 US-001 实现，trigger 为 DONE:VERIFICATION,DONE:QA"
     },
     {
       "id": "US-007",
@@ -147,8 +147,8 @@
         "触发 Ralph 重做循环"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": "这是 Ralph 集成的关键部分，需要处理 prd.json 的动态更新"
+      "passes": true,
+      "notes": "验证反馈闭环已由 US-001 实现 — trigger 覆盖所有开发 Agent（FW/APP/BACKEND/HW_LEAD/ARCHITECT）"
     },
     {
       "id": "US-010",
@@ -161,8 +161,8 @@
         "风险项写入 /tmp/agentflow/risk_register.json"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": "依赖 US-001 和 US-004"
+      "passes": true,
+      "notes": "Procurement 依赖已由 US-001 调整为 DONE:HW_LEAD,DONE:ARCHITECT，同时读取 BOM + 架构输出"
     },
     {
       "id": "US-011",
@@ -176,8 +176,8 @@
         "输出文件：/tmp/agentflow/qa_report.json"
       ],
       "priority": 12,
-      "passes": false,
-      "notes": "依赖所有开发 Agent 完成"
+      "passes": true,
+      "notes": "QA 架构对齐检查已由 US-001 实现 — 6 项检查覆盖架构对齐、接口一致性、BOM 完整性、PRD 覆盖率"
     },
     {
       "id": "US-012",
@@ -192,8 +192,8 @@
         "各阶段间用 DONE 标记等待"
       ],
       "priority": 13,
-      "passes": false,
-      "notes": "这是最复杂的脚本改动，依赖所有 sop-flow.jsonl 变更完成"
+      "passes": true,
+      "notes": "最复杂的脚本改动已完成 — 5 阶段串行/并行流转，14 个 Agent 窗口，DONE 标记依赖等待"
     },
     {
       "id": "US-013",
