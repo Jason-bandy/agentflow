@@ -1,0 +1,44 @@
+{
+  "project": "AgentFlow SOP Refactor - ME Lead Agent",
+  "branchName": "ralph/sop-refactor/me-lead",
+  "description": "结构工程主管 Agent — 负责 3D 结构图、装配方案和模具评估",
+  "userStories": [
+    {
+      "id": "MEL-001",
+      "title": "3D 结构图定义",
+      "description": "完成部件关系定义和公差分析",
+      "acceptanceCriteria": [
+        "所有结构部件的 3D 关系定义",
+        "关键尺寸公差分析",
+        "装配干涉检查",
+        "写入 /tmp/agentflow/me_lead_output.json"
+      ],
+      "priority": 1,
+      "passes": false
+    },
+    {
+      "id": "MEL-002",
+      "title": "装配方案设计",
+      "description": "完成 SOP 草案和装配流程",
+      "acceptanceCriteria": [
+        "装配顺序定义清晰",
+        "关键工序 SOP 草案",
+        "工装夹具需求评估"
+      ],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "MEL-003",
+      "title": "模具需求评估与 ID 对齐检查",
+      "description": "评估模具需求并与 ID 方案对齐",
+      "acceptanceCriteria": [
+        "模具类型和数量评估",
+        "与 ID 方案的对齐检查报告",
+        "3D 结构图与装配方案完整后打印 DONE:ME_LEAD"
+      ],
+      "priority": 3,
+      "passes": false
+    }
+  ]
+}

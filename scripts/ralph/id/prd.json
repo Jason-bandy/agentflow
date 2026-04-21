@@ -1,0 +1,45 @@
+{
+  "project": "AgentFlow SOP Refactor - ID Agent",
+  "branchName": "ralph/sop-refactor/id",
+  "description": "工业设计师 Agent — 负责外观方案、CMF 和色彩定义",
+  "userStories": [
+    {
+      "id": "ID-001",
+      "title": "产品外观设计方案",
+      "description": "完成产品外观 2D/3D 渲染图描述",
+      "acceptanceCriteria": [
+        "包含至少 2 个外观方案方向",
+        "每个方案附带 2D/3D 渲染描述",
+        "人机交互外观设计说明",
+        "写入 /tmp/agentflow/id_output.json"
+      ],
+      "priority": 1,
+      "passes": false
+    },
+    {
+      "id": "ID-002",
+      "title": "CMF 材料选择",
+      "description": "完成 Color/Material/Finish 选择",
+      "acceptanceCriteria": [
+        "颜色定义完整（含色号）",
+        "材料选择与成本匹配",
+        "表面处理工艺定义",
+        "CMF 方案通过自检"
+      ],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "ID-003",
+      "title": "色彩方案定义",
+      "description": "定义产品配色方案",
+      "acceptanceCriteria": [
+        "主色/辅色/点缀色定义",
+        "色彩方案与产品定位一致",
+        "完成后打印 DONE:ID"
+      ],
+      "priority": 3,
+      "passes": false
+    }
+  ]
+}

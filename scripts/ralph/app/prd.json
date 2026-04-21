@@ -1,0 +1,46 @@
+{
+  "project": "AgentFlow SOP Refactor - App Lead Agent",
+  "branchName": "ralph/sop-refactor/app",
+  "description": "App 开发工程师 Agent — 负责 App 技术选型、UI 设计和设备通信",
+  "userStories": [
+    {
+      "id": "APP-001",
+      "title": "App 技术选型与架构",
+      "description": "完成 iOS/Android/Flutter/React Native 技术选型和架构设计",
+      "acceptanceCriteria": [
+        "技术选型及理由",
+        "项目结构定义",
+        "状态管理方案设计",
+        "写入 /tmp/agentflow/app_output.json"
+      ],
+      "priority": 1,
+      "passes": false
+    },
+    {
+      "id": "APP-002",
+      "title": "UI 组件与 API 调用层",
+      "description": "完成 UI 组件设计、API 调用层实现",
+      "acceptanceCriteria": [
+        "核心 UI 组件定义",
+        "API 调用层实现骨架",
+        "错误处理和重试机制"
+      ],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "APP-003",
+      "title": "设备连接与数据持久化",
+      "description": "完成 BLE/WiFi 设备连接模块和数据持久化方案",
+      "acceptanceCriteria": [
+        "BLE 设备连接与配对流程",
+        "WiFi 直连/云端通信模块",
+        "本地数据持久化方案",
+        "单元测试框架搭建",
+        "代码骨架生成且接口对齐后打印 DONE:APP"
+      ],
+      "priority": 3,
+      "passes": false
+    }
+  ]
+}

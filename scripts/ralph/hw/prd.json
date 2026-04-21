@@ -1,0 +1,45 @@
+{
+  "project": "AgentFlow SOP Refactor - HW Lead Agent",
+  "branchName": "ralph/sop-refactor/hw",
+  "description": "硬件工程师 Agent — 负责 BOM 清单、PCB 需求和固件版本定义",
+  "userStories": [
+    {
+      "id": "HW-001",
+      "title": "硬件选型与 BOM 清单",
+      "description": "完成元器件选型和 BOM 清单（料号/规格/供应商）",
+      "acceptanceCriteria": [
+        "BOM 清单完整（料号/规格/供应商三要素）",
+        "BOM 完整率 >= 90%",
+        "关键元器件有替代料推荐",
+        "写入 /tmp/agentflow/hw_output.json"
+      ],
+      "priority": 1,
+      "passes": false
+    },
+    {
+      "id": "HW-002",
+      "title": "PCB 需求与固件版本定义",
+      "description": "定义 PCB 层数/尺寸/阻抗要求和固件版本号",
+      "acceptanceCriteria": [
+        "PCB 层数定义",
+        "PCB 尺寸和外形定义",
+        "阻抗要求定义",
+        "固件版本号定义（格式：v{major}.{minor}.{patch}）"
+      ],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "HW-003",
+      "title": "接口对齐与测试点定义",
+      "description": "确保接口约定与架构师输出一致，定义测试点",
+      "acceptanceCriteria": [
+        "I2C/SPI/UART 协议参数与 architect_output.json 一致",
+        "测试点定义完整",
+        "接口文档对齐后打印 DONE:HW_LEAD"
+      ],
+      "priority": 3,
+      "passes": false
+    }
+  ]
+}

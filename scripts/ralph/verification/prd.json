@@ -1,0 +1,47 @@
+{
+  "project": "AgentFlow SOP Refactor - Verification Agent",
+  "branchName": "ralph/sop-refactor/verification",
+  "description": "验证工程师 Agent — 负责系统功能验证和接口一致性检查",
+  "userStories": [
+    {
+      "id": "VER-001",
+      "title": "实现 vs 架构方案对齐度检查",
+      "description": "验证所有开发产出与架构师输出的对齐度",
+      "acceptanceCriteria": [
+        "读取所有开发产出文件（architect/hw/fw/app/backend）",
+        "逐项检查实现是否符合架构方案",
+        "输出对齐度评分",
+        "写入 /tmp/agentflow/verification_output.json"
+      ],
+      "priority": 1,
+      "passes": false
+    },
+    {
+      "id": "VER-002",
+      "title": "接口一致性验证",
+      "description": "验证 App/FW/Backend 三者接口一致性和软硬件接口对齐",
+      "acceptanceCriteria": [
+        "App-FW 接口一致性检查",
+        "FW-Backend 接口一致性检查",
+        "App-Backend 接口一致性检查",
+        "软硬件接口对齐检查"
+      ],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "VER-003",
+      "title": "系统功能完整性与重做循环",
+      "description": "验证系统功能完整性，处理验证失败的重做循环",
+      "acceptanceCriteria": [
+        "系统功能完整性验证",
+        "验证通过：设置 DONE:VERIFICATION",
+        "验证不通过：生成 /tmp/agentflow/verification_issues.json",
+        "标记问题 Agent 的 prd.json 为 passes: false，触发 Ralph 重做循环",
+        "完成后打印 DONE:VERIFICATION"
+      ],
+      "priority": 3,
+      "passes": false
+    }
+  ]
+}

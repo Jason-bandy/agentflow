@@ -1,0 +1,46 @@
+{
+  "project": "AgentFlow SOP Refactor - PM Agent",
+  "branchName": "ralph/sop-refactor/pm",
+  "description": "项目经理 Agent — 负责任务拆解、里程碑定义和风险预判",
+  "userStories": [
+    {
+      "id": "PM-001",
+      "title": "生成任务清单",
+      "description": "根据项目目标生成详细的任务分解清单",
+      "acceptanceCriteria": [
+        "输出 JSON 格式任务清单，包含 task_id, title, owner_agent, priority, estimated_days, depends_on",
+        "覆盖所有 5 个阶段的任务",
+        "写入 /tmp/agentflow/task_queue.json",
+        "完成后打印 DONE:PM"
+      ],
+      "priority": 1,
+      "passes": false
+    },
+    {
+      "id": "PM-002",
+      "title": "定义关键里程碑",
+      "description": "定义 M1-M5 五个阶段里程碑",
+      "acceptanceCriteria": [
+        "M1: Phase 1 完成（ID & ME 设计）",
+        "M2: Phase 2 完成（HW & PCB）",
+        "M3: Phase 3 完成（并行开发）",
+        "M4: Phase 4 完成（验证）",
+        "M5: Phase 5 完成（量产）"
+      ],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "PM-003",
+      "title": "风险预判",
+      "description": "识别项目风险并标注负责部门",
+      "acceptanceCriteria": [
+        "每项风险附带对应部门 Agent",
+        "包含交期风险、技术风险、成本风险",
+        "风险项写入任务清单"
+      ],
+      "priority": 3,
+      "passes": false
+    }
+  ]
+}

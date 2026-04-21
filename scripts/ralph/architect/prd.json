@@ -1,0 +1,45 @@
+{
+  "project": "AgentFlow SOP Refactor - Architect Agent",
+  "branchName": "ralph/sop-refactor/architect",
+  "description": "系统架构师 Agent — 负责系统功能架构、接口约定和通信协议",
+  "userStories": [
+    {
+      "id": "ARC-001",
+      "title": "系统功能架构设计",
+      "description": "完成系统模块划分、数据流和控制流设计",
+      "acceptanceCriteria": [
+        "模块划分清晰（App/FW/Backend/HW）",
+        "数据流图定义完整",
+        "控制流图定义完整",
+        "写入 /tmp/agentflow/architect_output.json"
+      ],
+      "priority": 1,
+      "passes": false
+    },
+    {
+      "id": "ARC-002",
+      "title": "软硬件接口约定",
+      "description": "完成 HW-SW Interface Spec 定义",
+      "acceptanceCriteria": [
+        "所有软硬件接口定义（GPIO/I2C/SPI/UART）",
+        "协议参数完整（速率、帧格式、超时）",
+        "接口约定可供 FW/App/Backend 使用"
+      ],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "ARC-003",
+      "title": "通信协议与安全方案",
+      "description": "定义通信协议栈和数据安全方案",
+      "acceptanceCriteria": [
+        "BLE/WiFi/UART/I2C/SPI 协议定义",
+        "数据存储与同步方案",
+        "安全与加密方案（TLS/加密算法/密钥管理）",
+        "架构方案完整后打印 DONE:ARCHITECT"
+      ],
+      "priority": 3,
+      "passes": false
+    }
+  ]
+}

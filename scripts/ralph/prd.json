@@ -58,7 +58,7 @@
         "所有 Agent 目录创建完成（pm/id/me-manager/me-lead/architect/hw/hw-board/fw/app/backend/procurement/verification/qa/production）"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "依赖 US-001（需知道所有 Agent ID）"
     },
     {

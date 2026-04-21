@@ -7,6 +7,8 @@ Started: 2026-04-21
 - sop-flow.jsonl 是 JSONL 格式，每行一个合法 JSON 对象
 - agents.json 中的现有 Agent（main, aftersale, sales 等）是通知系统配置，与 SOP 流程 Agent 是两套体系
 - launch-agents.sh 使用 tmux 窗口管理各 Agent，通过文件轮询实现依赖等待
+- Ralph 为每个 Agent 维护独立目录结构：scripts/ralph/<agent-id>/prd.json + progress.txt
+- 各 Agent 的 branchName 格式：ralph/sop-refactor/<agent-dir>（如 ralph/sop-refactor/pm）
 ---
 ## [2026-04-21] - US-001
 - Refactored sop-flow.jsonl from 6 steps to 14 steps across 5 phases
@@ -50,4 +52,15 @@ Started: 2026-04-21
 - **Learnings for future iterations:**
   - agents.json uses env field with key names like `DINGTALK_<DEPT>_CLIENT_ID` — the department name must match between agents.json, .env.example, and sop-flow.jsonl
   - `alias_of` field is used for Feishu mirror entries (e.g., main-feishu aliases main) — new SOP agents currently DingTalk-only
+---
+## [2026-04-21] - US-008
+- Created 14 agent directories under scripts/ralph/: pm, id, me-manager, me-lead, architect, hw, hw-board, fw, app, backend, procurement, verification, qa, production
+- Each directory contains prd.json (with agent-specific user stories) and progress.txt (initialized)
+- prd.json branchName follows pattern: ralph/sop-refactor/<agent-dir>
+- Each agent's user stories derived from their prompt_template in sop-flow.jsonl
+- ralph.sh and CLAUDE.md reused unchanged — each agent directory is invoked independently by Ralph
+- Files changed: scripts/ralph/{pm,id,me-manager,me-lead,architect,hw,hw-board,fw,app,backend,procurement,verification,qa,production}/prd.json + progress.txt
+- **Learnings for future iterations:**
+  - Agent directory names map to sop-flow.jsonl agents but use shortened forms (e.g., hw-lead-agent → hw, app-lead-agent → app)
+  - Each agent's prd.json is self-contained — Ralph runs independently per directory with its own completion tracking
 ---

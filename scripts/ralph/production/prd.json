@@ -1,0 +1,49 @@
+{
+  "project": "AgentFlow SOP Refactor - Production Manager Agent",
+  "branchName": "ralph/sop-refactor/production",
+  "description": "生产经理 Agent — 负责生产计划排期、产能评估和试产计划",
+  "userStories": [
+    {
+      "id": "PROD-001",
+      "title": "生产计划排期",
+      "description": "制定 EVT/DVT/PVT/MP 里程碑排期",
+      "acceptanceCriteria": [
+        "EVT（工程验证测试）排期",
+        "DVT（设计验证测试）排期",
+        "PVT（生产验证测试）排期",
+        "MP（量产）排期",
+        "写入 /tmp/agentflow/production_output.json"
+      ],
+      "priority": 1,
+      "passes": false
+    },
+    {
+      "id": "PROD-002",
+      "title": "产能评估与质量控制标准",
+      "description": "完成产能评估和质量控制标准定义",
+      "acceptanceCriteria": [
+        "日产能/月产能评估",
+        "瓶颈工序分析",
+        "IQC（来料检验）标准",
+        "IPQC（过程检验）标准",
+        "OQC/FQC（出货/最终检验）标准"
+      ],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "PROD-003",
+      "title": "试产计划与供应链风险评估",
+      "description": "完成试产计划和供应链风险评估",
+      "acceptanceCriteria": [
+        "试产数量定义",
+        "试产周期规划",
+        "试产验收标准",
+        "供应链风险评估与备选方案",
+        "完成后打印 DONE:PRODUCTION"
+      ],
+      "priority": 3,
+      "passes": false
+    }
+  ]
+}

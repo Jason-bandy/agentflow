@@ -1,0 +1,46 @@
+{
+  "project": "AgentFlow SOP Refactor - Backend Agent",
+  "branchName": "ralph/sop-refactor/backend",
+  "description": "后端工程师 Agent — 负责 API 服务、数据库和部署方案",
+  "userStories": [
+    {
+      "id": "BE-001",
+      "title": "后端技术栈与 API 设计",
+      "description": "完成后端技术栈选择和 REST/GraphQL API 服务设计",
+      "acceptanceCriteria": [
+        "技术栈选择及理由",
+        "API 端点定义（RESTful 或 GraphQL Schema）",
+        "API 文档（OpenAPI/Swagger）",
+        "写入 /tmp/agentflow/backend_output.json"
+      ],
+      "priority": 1,
+      "passes": false
+    },
+    {
+      "id": "BE-002",
+      "title": "数据库与认证方案",
+      "description": "完成数据库 Schema 设计和用户认证授权方案",
+      "acceptanceCriteria": [
+        "数据库 Schema 定义",
+        "用户认证方案（JWT/OAuth2/Session）",
+        "角色与权限定义",
+        "设备管理 API（注册/状态/OTA 推送）"
+      ],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "BE-003",
+      "title": "数据上报与部署方案",
+      "description": "完成数据上报 API、部署方案和监控告警",
+      "acceptanceCriteria": [
+        "数据上报与统计分析 API",
+        "部署方案（Docker/K8s/Serverless）",
+        "监控与告警配置",
+        "代码骨架生成且接口对齐后打印 DONE:BACKEND"
+      ],
+      "priority": 3,
+      "passes": false
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "project": "AgentFlow SOP Refactor - Procurement Agent",
+  "branchName": "ralph/sop-refactor/procurement",
+  "description": "采购 Agent — 负责供应商询价、交期风险评估和替代料推荐",
+  "userStories": [
+    {
+      "id": "PROC-001",
+      "title": "供应商询价",
+      "description": "基于 BOM 清单进行供应商询价",
+      "acceptanceCriteria": [
+        "每个料号至少 2-3 家供应商报价",
+        "价格包含 MOQ 和阶梯定价",
+        "写入 /tmp/agentflow/procurement_output.json"
+      ],
+      "priority": 1,
+      "passes": false
+    },
+    {
+      "id": "PROC-002",
+      "title": "交期风险评估",
+      "description": "评估各料号交期风险",
+      "acceptanceCriteria": [
+        "交期 > 14 天的料号标记为 [风险项]",
+        "风险项写入 /tmp/agentflow/risk_register.json",
+        "交期风险评估覆盖所有关键料号"
+      ],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "PROC-003",
+      "title": "替代料推荐与成本汇总",
+      "description": "推荐替代料并汇总采购成本",
+      "acceptanceCriteria": [
+        "关键料号有替代料推荐",
+        "采购成本汇总表",
+        "完成后打印 DONE:PROCUREMENT"
+      ],
+      "priority": 3,
+      "passes": false
+    }
+  ]
+}

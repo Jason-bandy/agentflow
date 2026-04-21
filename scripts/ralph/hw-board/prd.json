@@ -1,0 +1,45 @@
+{
+  "project": "AgentFlow SOP Refactor - HW Board App Agent",
+  "branchName": "ralph/sop-refactor/hw-board",
+  "description": "PCB 应用工程师 Agent — 负责 PCB 布局、信号完整性和 EMC 设计",
+  "userStories": [
+    {
+      "id": "HWB-001",
+      "title": "PCB 布局方案设计",
+      "description": "完成关键器件 placement 和布局规划",
+      "acceptanceCriteria": [
+        "关键器件 placement 定义",
+        "布局考虑信号路径最短原则",
+        "热设计考虑",
+        "写入 /tmp/agentflow/hw_board_output.json"
+      ],
+      "priority": 1,
+      "passes": false
+    },
+    {
+      "id": "HWB-002",
+      "title": "信号/电源完整性分析",
+      "description": "完成 SI/PI 分析和 EMC/EMI 设计考虑",
+      "acceptanceCriteria": [
+        "高速信号完整性分析",
+        "电源完整性分析（PDN 阻抗）",
+        "EMC/EMI 设计规则定义"
+      ],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "HWB-003",
+      "title": "Gerber 文件需求描述",
+      "description": "定义 Gerber 输出要求和制造规范",
+      "acceptanceCriteria": [
+        "Gerber 层定义",
+        "钻孔文件要求",
+        "制造规范（最小线宽/间距/孔径）",
+        "PCB 布局方案完整后打印 DONE:HW_BOARD"
+      ],
+      "priority": 3,
+      "passes": false
+    }
+  ]
+}

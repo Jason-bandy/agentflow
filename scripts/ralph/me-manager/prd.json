@@ -1,0 +1,44 @@
+{
+  "project": "AgentFlow SOP Refactor - ME Manager Agent",
+  "branchName": "ralph/sop-refactor/me-manager",
+  "description": "结构工程经理 Agent — 负责主体结构设计和内部堆叠规划",
+  "userStories": [
+    {
+      "id": "MEM-001",
+      "title": "主体结构设计方案",
+      "description": "基于 ID 方案完成主体结构工程化设计",
+      "acceptanceCriteria": [
+        "主体结构件设计完整",
+        "内部堆叠与空间规划合理",
+        "与 ID 外观方案对齐",
+        "写入 /tmp/agentflow/me_manager_output.json"
+      ],
+      "priority": 1,
+      "passes": false
+    },
+    {
+      "id": "MEM-002",
+      "title": "工程方案设计",
+      "description": "完成防水/防尘/散热等工程方案",
+      "acceptanceCriteria": [
+        "防水等级定义明确（如 IP67）",
+        "散热方案设计合理",
+        "防尘方案可行",
+        "工程方案覆盖关键场景"
+      ],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "MEM-003",
+      "title": "结构件 BOM 初稿",
+      "description": "生成结构件 BOM 清单",
+      "acceptanceCriteria": [
+        "所有结构件列出（料号/规格/材质）",
+        "BOM 通过自检后打印 DONE:ME_MANAGER"
+      ],
+      "priority": 3,
+      "passes": false
+    }
+  ]
+}

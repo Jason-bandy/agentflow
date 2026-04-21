@@ -1,0 +1,43 @@
+{
+  "project": "AgentFlow SOP Refactor - QA Agent",
+  "branchName": "ralph/sop-refactor/qa",
+  "description": "质量验收 Agent — 负责交叉验证和综合验收报告",
+  "userStories": [
+    {
+      "id": "QA-001",
+      "title": "架构对齐与接口一致性检查",
+      "description": "检查实现 vs 架构方案对齐度和三方接口一致性",
+      "acceptanceCriteria": [
+        "实现 vs 架构方案对齐度检查",
+        "App/FW/Backend 三者接口一致性",
+        "HW 接口 vs SW 接口对齐检查"
+      ],
+      "priority": 1,
+      "passes": false
+    },
+    {
+      "id": "QA-002",
+      "title": "BOM 完整性与 PRD 覆盖率检查",
+      "description": "检查 BOM 完整性和 PRD 覆盖率",
+      "acceptanceCriteria": [
+        "BOM 完整性检查（与 hw_output.json 对比）",
+        "PRD 覆盖率检查（与 task_queue.json 对比）",
+        "风险项汇总"
+      ],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "QA-003",
+      "title": "生成综合验收报告",
+      "description": "汇总所有检查结果生成综合验收报告",
+      "acceptanceCriteria": [
+        "综合验收报告包含所有检查维度",
+        "报告写入 /tmp/agentflow/qa_report.json",
+        "完成后打印 DONE:QA"
+      ],
+      "priority": 3,
+      "passes": false
+    }
+  ]
+}

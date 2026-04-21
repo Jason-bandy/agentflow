@@ -1,0 +1,45 @@
+{
+  "project": "AgentFlow SOP Refactor - FW Lead Agent",
+  "branchName": "ralph/sop-refactor/fw",
+  "description": "固件工程师 Agent — 负责固件架构、驱动开发和通信协议栈",
+  "userStories": [
+    {
+      "id": "FW-001",
+      "title": "固件架构设计",
+      "description": "完成 RTOS/Bare-metal 选择和任务划分",
+      "acceptanceCriteria": [
+        "RTOS 或 Bare-metal 选择及理由",
+        "任务划分和优先级定义",
+        "内存布局规划",
+        "写入 /tmp/agentflow/fw_output.json"
+      ],
+      "priority": 1,
+      "passes": false
+    },
+    {
+      "id": "FW-002",
+      "title": "外设驱动与通信协议栈",
+      "description": "完成 I2C/SPI/UART/GPIO/ADC 驱动骨架和 BLE/WiFi/MQTT 协议栈",
+      "acceptanceCriteria": [
+        "外设驱动代码骨架（I2C/SPI/UART/GPIO/ADC）",
+        "通信协议栈实现骨架（BLE/WiFi/MQTT）",
+        "接口与 architect_output.json 和 hw_output.json 一致"
+      ],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": "FW-003",
+      "title": "OTA 方案与功耗优化",
+      "description": "完成 OTA 升级方案、功耗优化和单元测试框架",
+      "acceptanceCriteria": [
+        "OTA 升级流程定义",
+        "功耗优化方案（休眠模式/唤醒策略）",
+        "单元测试框架搭建",
+        "代码骨架生成且接口对齐后打印 DONE:FW"
+      ],
+      "priority": 3,
+      "passes": false
+    }
+  ]
+}
