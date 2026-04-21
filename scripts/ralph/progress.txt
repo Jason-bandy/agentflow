@@ -73,3 +73,15 @@ Started: 2026-04-21
   - Agent directory names map to sop-flow.jsonl agents but use shortened forms (e.g., hw-lead-agent → hw, app-lead-agent → app)
   - Each agent's prd.json is self-contained — Ralph runs independently per directory with its own completion tracking
 ---
+## [2026-04-21] - US-005
+- Verified id-agent, me-manager-agent, me-lead-agent are all fully defined in sop-flow.jsonl (steps 2-4) with complete prompt_templates
+- id-agent: covers 外观方案, CMF材料选择, 色彩方案, 人机交互外观设计 — output: /tmp/agentflow/id_output.json
+- me-manager-agent: covers 主体结构, 内部堆叠, 防水/防尘/散热, 结构件BOM — output: /tmp/agentflow/me_manager_output.json
+- me-lead-agent: covers 3D结构图, 装配方案(SOP草案), 模具评估, ID对齐检查 — output: /tmp/agentflow/me_lead_output.json
+- agents.json entries configured with notification chain: pm-agent → id-agent → me-manager-agent → me-lead-agent → architect-agent
+- Ralph directories already created: scripts/ralph/id/, me-manager/, me-lead/ each with prd.json + progress.txt
+- Phase 1 serial chain verified: PM → ID → ME_MANAGER → ME_LEAD → ARCHITECT(Phase 2)
+- **Learnings for future iterations:**
+  - US-005 was already covered by US-001's refactoring — when verifying user stories, always check if prior work already satisfied the acceptance criteria
+  - ME agent output uses me_manager_output.json (two outputs split: me_manager + me_lead), not a single me_output.json as originally stated in PRD
+---

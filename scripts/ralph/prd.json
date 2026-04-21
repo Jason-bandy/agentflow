@@ -87,8 +87,8 @@
         "Phase 1 完成后触发 Phase 2"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": "Phase 1 的核心 Agent"
+      "passes": true,
+      "notes": "Phase 1 的核心 Agent — 已由 US-001 实现"
     },
     {
       "id": "US-002",
