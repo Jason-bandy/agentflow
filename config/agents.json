@@ -92,7 +92,7 @@
       "notifies": ["main", "sales", "tester"],
       "receives_from": ["dataanalyst", "main"],
       "task_label": "产品任务",
-      "owner": { "feishu_id": "ou_00473c0779a5269f92d464d0e0ba0d69", "name": "首席产品经理" }
+      "owner": { "feishu_id": "ou_00473c0779a5269f92d464d0e0ba0d69", "name": "首席产品经理", "dingtalk_userid": "01202140220785295" }
     },
     {
       "id": "dataanalyst",
@@ -195,7 +195,7 @@
       "notifies": ["id-agent"],
       "receives_from": [],
       "task_label": "项目管理任务",
-      "owner": { "feishu_id": "", "name": "项目经理", "note": "SOP 流程 PM 角色" }
+      "owner": { "feishu_id": "", "name": "项目经理", "dingtalk_userid": "0563050239941573", "note": "SOP 流程 PM 角色" }
     },
     {
       "id": "id-agent",
@@ -212,7 +212,7 @@
       "notifies": ["me-manager-agent"],
       "receives_from": ["pm-agent"],
       "task_label": "ID 设计任务",
-      "owner": { "feishu_id": "", "name": "工业设计师" }
+      "owner": { "feishu_id": "", "name": "工业设计师", "dingtalk_userid": "082344465026385880" }
     },
     {
       "id": "me-manager-agent",
@@ -229,7 +229,7 @@
       "notifies": ["me-lead-agent"],
       "receives_from": ["id-agent"],
       "task_label": "结构工程管理任务",
-      "owner": { "feishu_id": "", "name": "结构工程经理" }
+      "owner": { "feishu_id": "", "name": "结构工程经理", "dingtalk_userid": "013267560335298652" }
     },
     {
       "id": "me-lead-agent",
@@ -263,7 +263,7 @@
       "notifies": ["hw-lead-agent", "hw-board-app-agent"],
       "receives_from": ["me-lead-agent"],
       "task_label": "架构设计任务",
-      "owner": { "feishu_id": "", "name": "系统架构师" }
+      "owner": { "feishu_id": "", "name": "系统架构师", "dingtalk_userid": "01202140220785295" }
     },
     {
       "id": "hw-lead-agent",
@@ -280,7 +280,7 @@
       "notifies": ["fw-lead-agent"],
       "receives_from": ["architect-agent"],
       "task_label": "硬件开发任务",
-      "owner": { "feishu_id": "", "name": "硬件工程师" }
+      "owner": { "feishu_id": "", "name": "硬件工程师", "dingtalk_userid": "296243493337448471" }
     },
     {
       "id": "hw-board-app-agent",
@@ -297,7 +297,7 @@
       "notifies": [],
       "receives_from": ["hw-lead-agent"],
       "task_label": "PCB 设计任务",
-      "owner": { "feishu_id": "", "name": "PCB 应用工程师" }
+      "owner": { "feishu_id": "", "name": "PCB 应用工程师", "dingtalk_userid": "296243493337448471" }
     },
     {
       "id": "fw-lead-agent",
@@ -314,7 +314,7 @@
       "notifies": ["verification-agent", "qa-agent"],
       "receives_from": ["hw-lead-agent", "architect-agent"],
       "task_label": "固件开发任务",
-      "owner": { "feishu_id": "", "name": "固件工程师" }
+      "owner": { "feishu_id": "", "name": "固件工程师", "dingtalk_userid": "296243493337448471" }
     },
     {
       "id": "app-lead-agent",
@@ -331,7 +331,7 @@
       "notifies": ["verification-agent", "qa-agent"],
       "receives_from": ["architect-agent"],
       "task_label": "App 开发任务",
-      "owner": { "feishu_id": "", "name": "App 开发工程师" }
+      "owner": { "feishu_id": "", "name": "App 开发工程师", "dingtalk_userid": "076401572239907674" }
     },
     {
       "id": "backend-agent",
@@ -348,7 +348,7 @@
       "notifies": ["verification-agent", "qa-agent"],
       "receives_from": ["architect-agent"],
       "task_label": "后端开发任务",
-      "owner": { "feishu_id": "", "name": "后端工程师" }
+      "owner": { "feishu_id": "", "name": "后端工程师", "dingtalk_userid": "01335416404937770293" }
     },
     {
       "id": "procurement-agent",
@@ -365,7 +365,7 @@
       "notifies": ["qa-agent"],
       "receives_from": ["hw-lead-agent", "architect-agent"],
       "task_label": "采购任务",
-      "owner": { "feishu_id": "", "name": "采购专员" }
+      "owner": { "feishu_id": "", "name": "采购专员", "dingtalk_userid": "050761426033492929" }
     },
     {
       "id": "verification-agent",
@@ -382,7 +382,7 @@
       "notifies": ["production-manager-agent"],
       "receives_from": ["fw-lead-agent", "app-lead-agent", "backend-agent", "hw-lead-agent", "architect-agent"],
       "task_label": "系统验证任务",
-      "owner": { "feishu_id": "", "name": "验证工程师" }
+      "owner": { "feishu_id": "", "name": "验证工程师", "dingtalk_userid": "034417110427811155" }
     },
     {
       "id": "qa-agent",
@@ -399,7 +399,7 @@
       "notifies": ["production-manager-agent"],
       "receives_from": ["app-lead-agent", "fw-lead-agent", "backend-agent", "hw-lead-agent", "procurement-agent"],
       "task_label": "质量验收任务",
-      "owner": { "feishu_id": "", "name": "质量验收专员" }
+      "owner": { "feishu_id": "", "name": "质量验收专员", "dingtalk_userid": "02255443646630342188" }
     },
     {
       "id": "production-manager-agent",
@@ -416,7 +416,7 @@
       "notifies": [],
       "receives_from": ["verification-agent", "qa-agent"],
       "task_label": "生产管理任务",
-      "owner": { "feishu_id": "", "name": "生产经理" }
+      "owner": { "feishu_id": "", "name": "生产经理", "dingtalk_userid": "01375327230326290495" }
     }
   ],
 

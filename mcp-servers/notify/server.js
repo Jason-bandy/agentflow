@@ -308,52 +308,85 @@ async function notifyAgent({ agentId, title, content, openIdOrUserid = null, men
   if (!agent) throw new Error(`未找到 Agent: ${agentId}`);
 
   const creds = getAgentCredentials(agent);
+  const results = [];
 
-  if (agent.channel === "dingtalk") {
-    if (creds.clientId && creds.clientSecret && openIdOrUserid) {
-      // 有 appId + 指定人员 → 工作通知
-      return sendDingtalkAppNotify({
-        clientId: creds.clientId,
-        clientSecret: creds.clientSecret,
-        agentId: process.env.DINGTALK_AGENT_ID,
-        userids: [openIdOrUserid],
-        title,
-        content,
-      });
-    } else {
-      // 回退：PM Webhook（支持 @mention）
-      const webhookUrl = process.env.DINGTALK_WEBHOOK_PM;
-      if (!webhookUrl) throw new Error("未配置 DINGTALK_WEBHOOK_PM");
-      return sendDingtalkWebhook({
-        webhookUrl,
+  // ── 第一层：群 Webhook 通知（重要节点，全员可见，双群同步）──
+
+  // 1a. 钉钉群（总是推送，不论 agent 渠道）
+  const dingWebhookUrl = process.env.DINGTALK_WEBHOOK_PM;
+  if (dingWebhookUrl) {
+    try {
+      const r = await sendDingtalkWebhook({
+        webhookUrl: dingWebhookUrl,
         secret: process.env.DINGTALK_SECRET,
         title,
         content,
         atAll: isAtAll,
         mentionUserids,
       });
+      results.push(r);
+    } catch (err) {
+      results.push({ success: false, channel: "dingtalk-webhook", error: err.message });
     }
-  } else {
-    if (creds.appId && creds.appSecret && openIdOrUserid) {
-      return sendFeishuAppMessage({
-        appId: creds.appId,
-        appSecret: creds.appSecret,
-        openId: openIdOrUserid,
-        title,
-        content,
-      });
-    } else {
-      // 回退：Webhook（支持 @mention）
-      const webhookUrl = process.env.FEISHU_WEBHOOK_URL;
-      if (!webhookUrl) throw new Error("未配置 FEISHU_WEBHOOK_URL");
-      return sendFeishuWebhook({
-        webhookUrl,
+  }
+
+  // 1b. 飞书群（总是推送，双群同步）
+  const feiWebhookUrl = process.env.FEISHU_WEBHOOK_URL;
+  if (feiWebhookUrl) {
+    try {
+      const r = await sendFeishuWebhook({
+        webhookUrl: feiWebhookUrl,
         title,
         content,
         mentionOpenIds,
       });
+      results.push(r);
+    } catch (err) {
+      results.push({ success: false, channel: "feishu-webhook", error: err.message });
     }
   }
+
+  // ── 第二层：应用机器人单独通知（如有配置 + 指定了接收人）──
+  if (agent.channel === "dingtalk") {
+    if (creds.clientId && creds.clientSecret && openIdOrUserid) {
+      try {
+        const r = await sendDingtalkAppNotify({
+          clientId: creds.clientId,
+          clientSecret: creds.clientSecret,
+          agentId: process.env.DINGTALK_AGENT_ID,
+          userids: [openIdOrUserid],
+          title,
+          content,
+        });
+        results.push(r);
+      } catch (err) {
+        results.push({ success: false, channel: "dingtalk-app", error: err.message });
+      }
+    }
+  } else {
+    if (creds.appId && creds.appSecret && openIdOrUserid) {
+      try {
+        const r = await sendFeishuAppMessage({
+          appId: creds.appId,
+          appSecret: creds.appSecret,
+          openId: openIdOrUserid,
+          title,
+          content,
+        });
+        results.push(r);
+      } catch (err) {
+        results.push({ success: false, channel: "feishu-app", error: err.message });
+      }
+    }
+  }
+
+  // 如果两层都没发成功，报错
+  if (results.length === 0) {
+    const fallbackUrl = agent.channel === "dingtalk" ? "DINGTALK_WEBHOOK_PM" : "FEISHU_WEBHOOK_URL";
+    throw new Error(`未配置任何通知渠道，请设置 ${fallbackUrl}`);
+  }
+
+  return { agentId, channels: results };
 }
 
 // ──────────────────────────────────────────────
@@ -369,8 +402,33 @@ async function notifyDownstream({ sourceAgentId, event, title, content }) {
   const results = [];
 
   for (const targetId of targets) {
+    const targetAgent = config.agents.find((a) => a.id === targetId);
+    if (!targetAgent) {
+      results.push({ agentId: targetId, success: false, error: "Agent 未找到" });
+      continue;
+    }
+
+    // 自动提取下游 agent 的 @mention 信息
+    const owner = targetAgent.owner || {};
+    const mentionUserids = [];
+    const mentionOpenIds = [];
+
+    if (owner.dingtalk_userid) mentionUserids.push(owner.dingtalk_userid);
+    if (owner.feishu_id && owner.feishu_id.startsWith("ou_")) mentionOpenIds.push(owner.feishu_id);
+
+    // 在正文中追加 @负责人名称 提示（即使没有 ID 也能知道谁负责）
+    const enrichedContent = owner.name
+      ? `${content}\n\n> 📌 负责人：${owner.name}`
+      : content;
+
     try {
-      const result = await notifyAgent({ agentId: targetId, title, content });
+      const result = await notifyAgent({
+        agentId: targetId,
+        title,
+        content: enrichedContent,
+        mentionUserids,
+        mentionOpenIds,
+      });
       results.push({ agentId: targetId, ...result });
     } catch (err) {
       results.push({ agentId: targetId, success: false, error: err.message });
@@ -568,56 +626,84 @@ async function announceTaskTransition({
     content += `下游环节可以开始准备了。`;
   }
 
-  // 根据 Agent 渠道发送通知
+  // 根据 Agent 渠道发送通知 — 两层：群 Webhook + 应用机器人
   const creds = getAgentCredentials(agent);
   const title = `${agent.name} - ${taskTitle}`;
+  const results = [];
 
   if (agent.channel === "dingtalk") {
-    // 优先发群 @mention
+    // 第一层：群 Webhook @mention
     const webhookUrl = process.env.DINGTALK_WEBHOOK_PM;
     if (webhookUrl) {
-      return sendDingtalkWebhook({
-        webhookUrl,
-        secret: process.env.DINGTALK_SECRET,
-        title,
-        content,
-        mentionUserids,
-      });
+      try {
+        const r = await sendDingtalkWebhook({
+          webhookUrl,
+          secret: process.env.DINGTALK_SECRET,
+          title,
+          content,
+          mentionUserids,
+        });
+        results.push(r);
+      } catch (err) {
+        results.push({ success: false, channel: "dingtalk-webhook", error: err.message });
+      }
     }
-    // 回退：应用通知
+    // 第二层：应用机器人（如有配置）
     if (creds.clientId && creds.clientSecret) {
-      return sendDingtalkAppNotify({
-        clientId: creds.clientId,
-        clientSecret: creds.clientSecret,
-        agentId: process.env.DINGTALK_AGENT_ID,
-        userids: mentionUserids.length > 0 ? mentionUserids : ["all"],
-        title,
-        content,
-      });
+      try {
+        const r = await sendDingtalkAppNotify({
+          clientId: creds.clientId,
+          clientSecret: creds.clientSecret,
+          agentId: process.env.DINGTALK_AGENT_ID,
+          userids: mentionUserids.length > 0 ? mentionUserids : ["all"],
+          title,
+          content,
+        });
+        results.push(r);
+      } catch (err) {
+        results.push({ success: false, channel: "dingtalk-app", error: err.message });
+      }
     }
-    throw new Error("未配置钉钉通知渠道");
   } else {
     // 飞书
+    // 第一层：群 Webhook
     const webhookUrl = process.env.FEISHU_WEBHOOK_URL;
     if (webhookUrl) {
-      return sendFeishuWebhook({
-        webhookUrl,
-        title,
-        content,
-        mentionOpenIds,
-      });
+      try {
+        const r = await sendFeishuWebhook({
+          webhookUrl,
+          title,
+          content,
+          mentionOpenIds,
+        });
+        results.push(r);
+      } catch (err) {
+        results.push({ success: false, channel: "feishu-webhook", error: err.message });
+      }
     }
+    // 第二层：应用机器人（如有配置）
     if (creds.appId && creds.appSecret) {
-      return sendFeishuAppMessage({
-        appId: creds.appId,
-        appSecret: creds.appSecret,
-        openId: mentionOpenIds[0] || "",
-        title,
-        content,
-      });
+      try {
+        const r = await sendFeishuAppMessage({
+          appId: creds.appId,
+          appSecret: creds.appSecret,
+          openId: mentionOpenIds[0] || "",
+          title,
+          content,
+        });
+        results.push(r);
+      } catch (err) {
+        results.push({ success: false, channel: "feishu-app", error: err.message });
+      }
     }
-    throw new Error("未配置飞书通知渠道");
   }
+
+  if (results.length === 0) {
+    const fallback = agent.channel === "dingtalk" ? "DINGTALK_WEBHOOK_PM" : "FEISHU_WEBHOOK_URL";
+    throw new Error(`未配置任何通知渠道，请设置 ${fallback}`);
+  }
+
+  return { channels: results };
 }
 
 // ──────────────────────────────────────────────
