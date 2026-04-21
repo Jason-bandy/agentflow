@@ -72,8 +72,8 @@
         "下游依赖定义：App/FW/Backend 依赖架构师输出"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": "这是 Phase 2 的核心，HW/SW 开发前必须先有架构方案"
+      "passes": true,
+      "notes": "这是 Phase 2 的核心，HW/SW 开发前必须先有架构方案 — 已由 US-001 实现"
     },
     {
       "id": "US-005",

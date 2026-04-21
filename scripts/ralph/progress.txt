@@ -10,6 +10,15 @@ Started: 2026-04-21
 - Ralph 为每个 Agent 维护独立目录结构：scripts/ralph/<agent-id>/prd.json + progress.txt
 - 各 Agent 的 branchName 格式：ralph/sop-refactor/<agent-dir>（如 ralph/sop-refactor/pm）
 ---
+## [2026-04-21] - US-004
+- Verified architect-agent is fully defined in sop-flow.jsonl (step 5) with complete prompt_template covering system architecture, HW-SW interface spec, communication protocols, data storage, and security
+- architect-agent already implemented as part of US-001 refactoring — no additional file changes needed
+- Downstream dependencies confirmed: fw-lead-agent, app-lead-agent, backend-agent all depend on architect-agent
+- agents.json architect-agent entry configured with notification routing (line 252-267)
+- **Learnings for future iterations:**
+  - US-004's acceptance criteria were already satisfied by US-001's 5-phase refactoring — the trigger is DONE:ME_LEAD (not DONE:PM as originally written in PRD) because architect runs after Phase 1 completes
+  - When verifying user stories, check if prior stories already covered the implementation before making changes
+---
 ## [2026-04-21] - US-001
 - Refactored sop-flow.jsonl from 6 steps to 14 steps across 5 phases
 - Added 10 new agents: id-agent, me-manager-agent, me-lead-agent, architect-agent, hw-lead-agent, hw-board-app-agent, fw-lead-agent, app-lead-agent, backend-agent, verification-agent, production-manager-agent
