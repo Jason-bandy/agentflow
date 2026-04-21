@@ -178,6 +178,245 @@
       "notifies": ["productmanager-feishu"],
       "receives_from": ["productmanager-feishu"],
       "task_label": "销售任务"
+    },
+
+    {
+      "id": "pm-agent",
+      "name": "项目经理 Agent",
+      "bot_name": "PM Agent",
+      "description": "SOP 流程项目经理，负责任务拆解、里程碑定义与跨部门协调",
+      "channel": "dingtalk",
+      "group_webhook": "${DINGTALK_WEBHOOK_PM}",
+      "env": {
+        "clientId": "DINGTALK_PM_CLIENT_ID",
+        "clientSecret": "DINGTALK_PM_CLIENT_SECRET",
+        "model": "DINGTALK_PM_MODEL"
+      },
+      "notifies": ["id-agent"],
+      "receives_from": [],
+      "task_label": "项目管理任务",
+      "owner": { "feishu_id": "", "name": "项目经理", "note": "SOP 流程 PM 角色" }
+    },
+    {
+      "id": "id-agent",
+      "name": "工业设计师 Agent",
+      "bot_name": "ID Agent",
+      "description": "SOP 流程工业设计师，负责外观设计方案、CMF 定义与色彩方案",
+      "channel": "dingtalk",
+      "group_webhook": "${DINGTALK_WEBHOOK_ID}",
+      "env": {
+        "clientId": "DINGTALK_ID_CLIENT_ID",
+        "clientSecret": "DINGTALK_ID_CLIENT_SECRET",
+        "model": "DINGTALK_ID_MODEL"
+      },
+      "notifies": ["me-manager-agent"],
+      "receives_from": ["pm-agent"],
+      "task_label": "ID 设计任务",
+      "owner": { "feishu_id": "", "name": "工业设计师" }
+    },
+    {
+      "id": "me-manager-agent",
+      "name": "结构工程经理 Agent",
+      "bot_name": "ME Manager Agent",
+      "description": "SOP 流程结构工程经理，负责主体结构设计、内部堆叠规划与工程方案",
+      "channel": "dingtalk",
+      "group_webhook": "${DINGTALK_WEBHOOK_ME_MANAGER}",
+      "env": {
+        "clientId": "DINGTALK_ME_MANAGER_CLIENT_ID",
+        "clientSecret": "DINGTALK_ME_MANAGER_CLIENT_SECRET",
+        "model": "DINGTALK_ME_MANAGER_MODEL"
+      },
+      "notifies": ["me-lead-agent"],
+      "receives_from": ["id-agent"],
+      "task_label": "结构工程管理任务",
+      "owner": { "feishu_id": "", "name": "结构工程经理" }
+    },
+    {
+      "id": "me-lead-agent",
+      "name": "结构工程主管 Agent",
+      "bot_name": "ME Lead Agent",
+      "description": "SOP 流程结构工程主管，负责 3D 结构图定义、装配方案与模具需求评估",
+      "channel": "dingtalk",
+      "group_webhook": "${DINGTALK_WEBHOOK_ME_LEAD}",
+      "env": {
+        "clientId": "DINGTALK_ME_LEAD_CLIENT_ID",
+        "clientSecret": "DINGTALK_ME_LEAD_CLIENT_SECRET",
+        "model": "DINGTALK_ME_LEAD_MODEL"
+      },
+      "notifies": ["architect-agent"],
+      "receives_from": ["me-manager-agent"],
+      "task_label": "结构工程任务",
+      "owner": { "feishu_id": "", "name": "结构工程主管" }
+    },
+    {
+      "id": "architect-agent",
+      "name": "系统架构师 Agent",
+      "bot_name": "Architect Agent",
+      "description": "SOP 流程系统架构师，负责系统功能架构设计、软硬件接口约定与通信协议定义",
+      "channel": "dingtalk",
+      "group_webhook": "${DINGTALK_WEBHOOK_ARCHITECT}",
+      "env": {
+        "clientId": "DINGTALK_ARCHITECT_CLIENT_ID",
+        "clientSecret": "DINGTALK_ARCHITECT_CLIENT_SECRET",
+        "model": "DINGTALK_ARCHITECT_MODEL"
+      },
+      "notifies": ["hw-lead-agent", "hw-board-app-agent"],
+      "receives_from": ["me-lead-agent"],
+      "task_label": "架构设计任务",
+      "owner": { "feishu_id": "", "name": "系统架构师" }
+    },
+    {
+      "id": "hw-lead-agent",
+      "name": "硬件工程师 Agent",
+      "bot_name": "HW Lead Agent",
+      "description": "SOP 流程硬件工程师，负责硬件选型、BOM 清单、PCB 需求与固件版本号定义",
+      "channel": "dingtalk",
+      "group_webhook": "${DINGTALK_WEBHOOK_HW_LEAD}",
+      "env": {
+        "clientId": "DINGTALK_HW_LEAD_CLIENT_ID",
+        "clientSecret": "DINGTALK_HW_LEAD_CLIENT_SECRET",
+        "model": "DINGTALK_HW_LEAD_MODEL"
+      },
+      "notifies": ["fw-lead-agent"],
+      "receives_from": ["architect-agent"],
+      "task_label": "硬件开发任务",
+      "owner": { "feishu_id": "", "name": "硬件工程师" }
+    },
+    {
+      "id": "hw-board-app-agent",
+      "name": "PCB 应用工程师 Agent",
+      "bot_name": "HW Board App Agent",
+      "description": "SOP 流程 PCB 应用工程师，负责 PCB 布局方案、信号/电源完整性分析与 EMC/EMI 设计",
+      "channel": "dingtalk",
+      "group_webhook": "${DINGTALK_WEBHOOK_HW_BOARD_APP}",
+      "env": {
+        "clientId": "DINGTALK_HW_BOARD_APP_CLIENT_ID",
+        "clientSecret": "DINGTALK_HW_BOARD_APP_CLIENT_SECRET",
+        "model": "DINGTALK_HW_BOARD_APP_MODEL"
+      },
+      "notifies": [],
+      "receives_from": ["hw-lead-agent"],
+      "task_label": "PCB 设计任务",
+      "owner": { "feishu_id": "", "name": "PCB 应用工程师" }
+    },
+    {
+      "id": "fw-lead-agent",
+      "name": "固件工程师 Agent",
+      "bot_name": "FW Lead Agent",
+      "description": "SOP 流程固件工程师，负责固件架构设计、外设驱动、通信协议栈与 OTA 方案",
+      "channel": "dingtalk",
+      "group_webhook": "${DINGTALK_WEBHOOK_FW_LEAD}",
+      "env": {
+        "clientId": "DINGTALK_FW_LEAD_CLIENT_ID",
+        "clientSecret": "DINGTALK_FW_LEAD_CLIENT_SECRET",
+        "model": "DINGTALK_FW_LEAD_MODEL"
+      },
+      "notifies": ["verification-agent", "qa-agent"],
+      "receives_from": ["hw-lead-agent", "architect-agent"],
+      "task_label": "固件开发任务",
+      "owner": { "feishu_id": "", "name": "固件工程师" }
+    },
+    {
+      "id": "app-lead-agent",
+      "name": "App 开发工程师 Agent",
+      "bot_name": "App Lead Agent",
+      "description": "SOP 流程 App 开发工程师，负责 App 技术选型、UI 组件设计、设备连接与数据持久化方案",
+      "channel": "dingtalk",
+      "group_webhook": "${DINGTALK_WEBHOOK_APP_LEAD}",
+      "env": {
+        "clientId": "DINGTALK_APP_LEAD_CLIENT_ID",
+        "clientSecret": "DINGTALK_APP_LEAD_CLIENT_SECRET",
+        "model": "DINGTALK_APP_LEAD_MODEL"
+      },
+      "notifies": ["verification-agent", "qa-agent"],
+      "receives_from": ["architect-agent"],
+      "task_label": "App 开发任务",
+      "owner": { "feishu_id": "", "name": "App 开发工程师" }
+    },
+    {
+      "id": "backend-agent",
+      "name": "后端工程师 Agent",
+      "bot_name": "Backend Agent",
+      "description": "SOP 流程后端工程师，负责后端技术栈、API 服务设计、数据库 Schema 与部署方案",
+      "channel": "dingtalk",
+      "group_webhook": "${DINGTALK_WEBHOOK_BACKEND}",
+      "env": {
+        "clientId": "DINGTALK_BACKEND_CLIENT_ID",
+        "clientSecret": "DINGTALK_BACKEND_CLIENT_SECRET",
+        "model": "DINGTALK_BACKEND_MODEL"
+      },
+      "notifies": ["verification-agent", "qa-agent"],
+      "receives_from": ["architect-agent"],
+      "task_label": "后端开发任务",
+      "owner": { "feishu_id": "", "name": "后端工程师" }
+    },
+    {
+      "id": "procurement-agent",
+      "name": "采购 Agent",
+      "bot_name": "Procurement Agent",
+      "description": "SOP 流程采购 Agent，负责供应商询价、交期风险评估、替代料推荐与采购成本汇总",
+      "channel": "dingtalk",
+      "group_webhook": "${DINGTALK_WEBHOOK_PROCUREMENT}",
+      "env": {
+        "clientId": "DINGTALK_PROCUREMENT_CLIENT_ID",
+        "clientSecret": "DINGTALK_PROCUREMENT_CLIENT_SECRET",
+        "model": "DINGTALK_PROCUREMENT_MODEL"
+      },
+      "notifies": ["qa-agent"],
+      "receives_from": ["hw-lead-agent", "architect-agent"],
+      "task_label": "采购任务",
+      "owner": { "feishu_id": "", "name": "采购专员" }
+    },
+    {
+      "id": "verification-agent",
+      "name": "验证工程师 Agent",
+      "bot_name": "Verification Agent",
+      "description": "SOP 流程验证工程师，负责系统功能验证、接口一致性检查与 Ralph 重做循环触发",
+      "channel": "dingtalk",
+      "group_webhook": "${DINGTALK_WEBHOOK_VERIFICATION}",
+      "env": {
+        "clientId": "DINGTALK_VERIFICATION_CLIENT_ID",
+        "clientSecret": "DINGTALK_VERIFICATION_CLIENT_SECRET",
+        "model": "DINGTALK_VERIFICATION_MODEL"
+      },
+      "notifies": ["production-manager-agent"],
+      "receives_from": ["fw-lead-agent", "app-lead-agent", "backend-agent", "hw-lead-agent", "architect-agent"],
+      "task_label": "系统验证任务",
+      "owner": { "feishu_id": "", "name": "验证工程师" }
+    },
+    {
+      "id": "qa-agent",
+      "name": "质量验收 Agent",
+      "bot_name": "QA Agent",
+      "description": "SOP 流程质量验收 Agent，负责交叉验证、架构对齐检查、BOM 完整性与 PRD 覆盖率检查",
+      "channel": "dingtalk",
+      "group_webhook": "${DINGTALK_WEBHOOK_QA}",
+      "env": {
+        "clientId": "DINGTALK_QA_CLIENT_ID",
+        "clientSecret": "DINGTALK_QA_CLIENT_SECRET",
+        "model": "DINGTALK_QA_MODEL"
+      },
+      "notifies": ["production-manager-agent"],
+      "receives_from": ["app-lead-agent", "fw-lead-agent", "backend-agent", "hw-lead-agent", "procurement-agent"],
+      "task_label": "质量验收任务",
+      "owner": { "feishu_id": "", "name": "质量验收专员" }
+    },
+    {
+      "id": "production-manager-agent",
+      "name": "生产经理 Agent",
+      "bot_name": "Production Manager Agent",
+      "description": "SOP 流程生产经理，负责生产计划排期、产能评估、质量控制标准与试产计划",
+      "channel": "dingtalk",
+      "group_webhook": "${DINGTALK_WEBHOOK_PRODUCTION}",
+      "env": {
+        "clientId": "DINGTALK_PRODUCTION_CLIENT_ID",
+        "clientSecret": "DINGTALK_PRODUCTION_CLIENT_SECRET",
+        "model": "DINGTALK_PRODUCTION_MODEL"
+      },
+      "notifies": [],
+      "receives_from": ["verification-agent", "qa-agent"],
+      "task_label": "生产管理任务",
+      "owner": { "feishu_id": "", "name": "生产经理" }
     }
   ],
 
