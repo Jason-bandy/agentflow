@@ -85,3 +85,10 @@ Started: 2026-04-21
   - US-005 was already covered by US-001's refactoring — when verifying user stories, always check if prior work already satisfied the acceptance criteria
   - ME agent output uses me_manager_output.json (two outputs split: me_manager + me_lead), not a single me_output.json as originally stated in PRD
 ---
+## [2026-04-21] - US-002
+- Verified hw-lead-agent in sop-flow.jsonl (step 6) covers all US-002 acceptance criteria
+- prompt_template includes: BOM清单(料号/规格/供应商), PCB需求描述(层数/尺寸/阻抗), 固件版本号定义(v{major}.{minor}.{patch}), 接口约定对齐, 测试点定义
+- output_file: /tmp/agentflow/hw_output.json — matches original requirement
+- **Learnings for future iterations:**
+  - HW responsibilities were split across two agents: hw-lead (BOM, firmware version, interfaces) and hw-board-app (PCB layout, signal integrity, EMC/EMI)
+---

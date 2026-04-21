@@ -102,8 +102,8 @@
         "输出文件保持 /tmp/agentflow/hw_output.json"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": "基于 US-001 的新 Agent 定义进行细化"
+      "passes": true,
+      "notes": "基于 US-001 的新 Agent 定义进行细化 — hw-lead-agent prompt 已包含固件版本号、BOM、PCB 需求"
     },
     {
       "id": "US-003",
