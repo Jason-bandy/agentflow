@@ -1,0 +1,83 @@
+# Claude Code MCP Server 注册配置
+#
+# 将以下 JSON 块合并到 ~/.claude/settings.json 的 mcpServers 字段
+# 合并后 Claude Code 会话中可直接调用 notify_agent / notify_downstream / generate_and_push_report 等工具
+
+{
+  "mcpServers": {
+    "agentflow-notify": {
+      "command": "node",
+      "args": ["/Users/a123/agent/agentflow/mcp-servers/notify/server.js"],
+      "env": {
+        "ANTHROPIC_BASE_URL": "https://coding.dashscope.aliyuncs.com/apps/anthropic",
+        "ANTHROPIC_AUTH_TOKEN": "sk-sp-152524228dcb4b878174e31d269574b2",
+        "ANTHROPIC_MODEL": "qwen3.6-plus",
+        "OPENCLAW_BASE_URL": "https://api.openclaw.ai/v1",
+        "OPENCLAW_API_KEY": "your_openclaw_api_key_here",
+
+        "DINGTALK_WEBHOOK_PM": "https://oapi.dingtalk.com/robot/send?access_token=5fba39669473b1c0dbf3b97456590987fb3b3df29911b2266a6c85ab77a25931",
+        "DINGTALK_WEBHOOK_PM_SECRET": "",
+
+        "DINGTALK_MAIN_CLIENT_ID": "dingndmbsghqvpkrwm1d",
+        "DINGTALK_MAIN_CLIENT_SECRET": "n9I2HGTnMeQkVXLLYTlPOoXasoQWguMyyz_5RlnJCdfbolzHtGrJxgzcI2HXNX_U",
+        "DINGTALK_MAIN_MODEL": "claude-sonnet-4-6",
+
+        "DINGTALK_AFTERSALE_CLIENT_ID": "dingopxjerykkiycoytz",
+        "DINGTALK_AFTERSALE_CLIENT_SECRET": "K87aDAJuVuY0lM-Cgw_cPcMr5ELzGR7dTkh0FcplRnp74o1VZawN8jnGppFHoFzv",
+        "DINGTALK_AFTERSALE_MODEL": "gemini-3.1-pro-preview",
+
+        "DINGTALK_SALES_CLIENT_ID": "dingkte9zrzbodqruy1o",
+        "DINGTALK_SALES_CLIENT_SECRET": "RH0w4jdXKHqhEJMMS3gfkDVLzWQuU2uoSLBoHNbHvmR0VsOG62SxfFZFokgaMCN3",
+        "DINGTALK_SALES_MODEL": "gemini-3.1-pro-preview",
+
+        "DINGTALK_HR_CLIENT_ID": "ding53lutkwkwz3ay2y3",
+        "DINGTALK_HR_CLIENT_SECRET": "IjlL-h5jSqDmVqCzX6j-jMKKf_8H8JW1Qlf5_FwVOUh8kWrVdOXHsVjco7GgCOxm",
+        "DINGTALK_HR_MODEL": "gemini-3.1-pro-preview",
+
+        "DINGTALK_PM_CLIENT_ID": "dingwtnjpe3vkgltia6e",
+        "DINGTALK_PM_CLIENT_SECRET": "-WGtOXZ6bEotgIglmsbnUYZ59wDRS9h7jMJI_bJ-fkeNAHdCk3Wx6l-FyE8mqHUO",
+        "DINGTALK_PM_MODEL": "qwen3-coder-plus",
+
+        "FEISHU_DATAANALYST_APP_ID": "cli_a95719e445a15bc9",
+        "FEISHU_DATAANALYST_APP_SECRET": "lgXqfFEl52hwN2nNcRUOmcLUJTP3hYPq",
+        "FEISHU_DATAANALYST_MODEL": "qwen3.5-plus",
+
+        "FEISHU_TESTER_APP_ID": "cli_a957696854b99bdf",
+        "FEISHU_TESTER_APP_SECRET": "OxLwESSYbfJV5VmQMjvbqbzNTGXDBd6D",
+        "FEISHU_TESTER_MODEL": "claude-sonnet-4-6",
+
+        "FEISHU_MAIN_APP_ID": "cli_a957727576badceb",
+        "FEISHU_MAIN_APP_SECRET": "dYpV75BOi6Eh7HczqwiJne68mRFhhFSS",
+        "FEISHU_MAIN_MODEL": "claude-sonnet-4-6",
+
+        "FEISHU_PM_APP_ID": "cli_a9576fce7df9dbb5",
+        "FEISHU_PM_APP_SECRET": "QxwXiGhSorTYF01CbQAQMgjotWYwJk7q",
+        "FEISHU_PM_MODEL": "qwen3-coder-plus",
+
+        "FEISHU_SALES_APP_ID": "cli_a957522d0d38dcd1",
+        "FEISHU_SALES_APP_SECRET": "sNvZmknwnyulcZ8b1PpRxC288p5hSOGR",
+        "FEISHU_SALES_MODEL": "gemini-3.1-pro-preview",
+
+        "FEISHU_WEBHOOK_URL": ""
+      }
+    }
+  }
+}
+
+# ──────────────────────────────────────────────
+# 安装步骤
+# ──────────────────────────────────────────────
+# 1. 安装 Node 依赖
+#    cd /Users/a123/agent/agentflow/mcp-servers/notify
+#    npm install
+#
+# 2. 填入 OPENCLAW_API_KEY（上方 JSON 中替换 your_openclaw_api_key_here）
+#
+# 3. 合并到 ~/.claude/settings.json
+#    用编辑器打开 ~/.claude/settings.json，将 mcpServers 块合并进去
+#
+# 4. 重启 Claude Code
+#    新会话中执行：使用 list_agents 工具查看所有已配置 Agent
+#
+# 5. 测试推送
+#    告诉 Claude：请用 notify_agent 向 main 发一条测试消息

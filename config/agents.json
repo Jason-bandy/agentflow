@@ -1,0 +1,203 @@
+{
+  "group": {
+    "name": "AgentFlow 协同群（单群模式）",
+    "dingtalk_webhook": "${DINGTALK_WEBHOOK_PM}",
+    "feishu_webhook": "${FEISHU_WEBHOOK_URL}",
+    "note": "所有机器人当前在同一个群，扩展多群时在各 agent 的 group_webhook 字段填对应群 URL"
+  },
+
+  "completion_keywords": ["完成", "DONE", "done", "✅", "已完成", "任务完成", "交付完成"],
+
+  "agents": [
+    {
+      "id": "main",
+      "name": "Main Dev Bot",
+      "bot_name": "Main Dev Bot",
+      "description": "主开发助手，负责技术研发、架构咨询与日常开发工作",
+      "channel": "dingtalk",
+      "group_webhook": "${DINGTALK_WEBHOOK_PM}",
+      "env": {
+        "clientId": "DINGTALK_MAIN_CLIENT_ID",
+        "clientSecret": "DINGTALK_MAIN_CLIENT_SECRET",
+        "model": "DINGTALK_MAIN_MODEL"
+      },
+      "notifies": ["tester", "productmanager"],
+      "receives_from": ["productmanager", "hr"],
+      "task_label": "研发任务",
+      "owner": { "feishu_id": "ou_c76f5c18f022142afe198aea939e2167", "name": "首席开发工程师" }
+    },
+    {
+      "id": "aftersale",
+      "name": "售后技术支持 Bot",
+      "bot_name": "售后技术支持 Bot",
+      "description": "技术支持智能体，处理产品售后问题与技术答疑",
+      "channel": "dingtalk",
+      "group_webhook": "${DINGTALK_WEBHOOK_PM}",
+      "env": {
+        "clientId": "DINGTALK_AFTERSALE_CLIENT_ID",
+        "clientSecret": "DINGTALK_AFTERSALE_CLIENT_SECRET",
+        "model": "DINGTALK_AFTERSALE_MODEL"
+      },
+      "notifies": ["productmanager", "main"],
+      "receives_from": ["sales", "main"],
+      "task_label": "售后支持任务",
+      "owner": { "feishu_id": "", "name": "售后技术支持 Bot", "note": "无飞书入口，钉钉only" }
+    },
+    {
+      "id": "sales",
+      "name": "Sales Bot",
+      "bot_name": "Sales Bot",
+      "description": "市场及销售智能体，支持销售团队日常工作与客户沟通",
+      "channel": "dingtalk",
+      "group_webhook": "${DINGTALK_WEBHOOK_PM}",
+      "env": {
+        "clientId": "DINGTALK_SALES_CLIENT_ID",
+        "clientSecret": "DINGTALK_SALES_CLIENT_SECRET",
+        "model": "DINGTALK_SALES_MODEL"
+      },
+      "notifies": ["aftersale", "productmanager"],
+      "receives_from": ["productmanager", "aftersale"],
+      "task_label": "销售任务",
+      "owner": { "feishu_id": "cli_a957522d0d38dcd1", "name": "Sales Bot", "note": "open_id: ou_4bd78f610ccb45a7564efbc28ce38305" }
+    },
+    {
+      "id": "hr",
+      "name": "HR Bot",
+      "bot_name": "HR Bot",
+      "description": "人力资源智能体，处理 HR 相关咨询与人员管理辅助",
+      "channel": "dingtalk",
+      "group_webhook": "${DINGTALK_WEBHOOK_PM}",
+      "env": {
+        "clientId": "DINGTALK_HR_CLIENT_ID",
+        "clientSecret": "DINGTALK_HR_CLIENT_SECRET",
+        "model": "DINGTALK_HR_MODEL"
+      },
+      "notifies": ["main"],
+      "receives_from": [],
+      "task_label": "HR任务",
+      "owner": { "feishu_id": "", "name": "HR Bot", "note": "无飞书入口，钉钉only" }
+    },
+    {
+      "id": "productmanager",
+      "name": "ProductManager Bot",
+      "bot_name": "ProductManager Bot",
+      "description": "产品经理智能体，负责需求分析、产品规划与跨团队协作",
+      "channel": "dingtalk",
+      "group_webhook": "${DINGTALK_WEBHOOK_PM}",
+      "env": {
+        "clientId": "DINGTALK_PM_CLIENT_ID",
+        "clientSecret": "DINGTALK_PM_CLIENT_SECRET",
+        "model": "DINGTALK_PM_MODEL"
+      },
+      "notifies": ["main", "sales", "tester"],
+      "receives_from": ["dataanalyst", "main"],
+      "task_label": "产品任务",
+      "owner": { "feishu_id": "ou_00473c0779a5269f92d464d0e0ba0d69", "name": "首席产品经理" }
+    },
+    {
+      "id": "dataanalyst",
+      "name": "DataAnalyst Bot",
+      "bot_name": "DataAnalyst Bot",
+      "description": "数据分析智能体，负责数据处理、报表生成与业务洞察",
+      "channel": "feishu",
+      "group_webhook": "${FEISHU_WEBHOOK_URL}",
+      "env": {
+        "appId": "FEISHU_DATAANALYST_APP_ID",
+        "appSecret": "FEISHU_DATAANALYST_APP_SECRET",
+        "model": "FEISHU_DATAANALYST_MODEL"
+      },
+      "notifies": ["productmanager", "sales"],
+      "receives_from": [],
+      "task_label": "数据分析任务",
+      "owner": { "feishu_id": "ou_757472ea8bf6445670af9278081da80b", "name": "DataAnalyst Bot" }
+    },
+    {
+      "id": "tester",
+      "name": "Tester Bot",
+      "bot_name": "Tester Bot",
+      "description": "测试智能体，负责测试用例管理、质量保障与问题跟踪",
+      "channel": "feishu",
+      "group_webhook": "${FEISHU_WEBHOOK_URL}",
+      "env": {
+        "appId": "FEISHU_TESTER_APP_ID",
+        "appSecret": "FEISHU_TESTER_APP_SECRET",
+        "model": "FEISHU_TESTER_MODEL"
+      },
+      "notifies": ["main", "productmanager"],
+      "receives_from": ["main", "productmanager"],
+      "task_label": "测试任务",
+      "owner": { "feishu_id": "ou_f0ce03bf2816399d2fb270681b526e81", "name": "首席测试开发" }
+    },
+    {
+      "id": "main-feishu",
+      "name": "Main Dev Bot (飞书)",
+      "bot_name": "Main Dev Bot",
+      "description": "主开发助手的飞书入口",
+      "channel": "feishu",
+      "alias_of": "main",
+      "group_webhook": "${FEISHU_WEBHOOK_URL}",
+      "env": {
+        "appId": "FEISHU_MAIN_APP_ID",
+        "appSecret": "FEISHU_MAIN_APP_SECRET",
+        "model": "FEISHU_MAIN_MODEL"
+      },
+      "notifies": ["tester", "productmanager-feishu"],
+      "receives_from": ["productmanager-feishu"],
+      "task_label": "研发任务"
+    },
+    {
+      "id": "productmanager-feishu",
+      "name": "ProductManager Bot (飞书)",
+      "bot_name": "ProductManager Bot",
+      "description": "产品经理智能体的飞书入口",
+      "channel": "feishu",
+      "alias_of": "productmanager",
+      "group_webhook": "${FEISHU_WEBHOOK_URL}",
+      "env": {
+        "appId": "FEISHU_PM_APP_ID",
+        "appSecret": "FEISHU_PM_APP_SECRET",
+        "model": "FEISHU_PM_MODEL"
+      },
+      "notifies": ["main-feishu", "sales-feishu", "tester"],
+      "receives_from": ["dataanalyst", "main-feishu"],
+      "task_label": "产品任务"
+    },
+    {
+      "id": "sales-feishu",
+      "name": "Sales Bot (飞书)",
+      "bot_name": "Sales Bot",
+      "description": "销售智能体的飞书入口",
+      "channel": "feishu",
+      "alias_of": "sales",
+      "group_webhook": "${FEISHU_WEBHOOK_URL}",
+      "env": {
+        "appId": "FEISHU_SALES_APP_ID",
+        "appSecret": "FEISHU_SALES_APP_SECRET",
+        "model": "FEISHU_SALES_MODEL"
+      },
+      "notifies": ["productmanager-feishu"],
+      "receives_from": ["productmanager-feishu"],
+      "task_label": "销售任务"
+    }
+  ],
+
+  "notification_rules": [
+    {
+      "event": "task_completed",
+      "notify_scheduling_group": true,
+      "message_template": "✅ **{{agent_name}}** 完成了{{task_label}}\n**发起人**：{{sender}}\n**时间**：{{timestamp}}\n**摘要**：{{message_summary}}\n\n➡️ 已通知下游：{{downstream_agents}}"
+    },
+    {
+      "event": "risk_detected",
+      "severity": "high",
+      "notify_scheduling_group": true,
+      "message_template": "🔴 **风险告警** | {{agent_name}}\n**风险描述**：{{risk_description}}\n**时间**：{{timestamp}}"
+    },
+    {
+      "event": "daily_report",
+      "schedule": "3 9 * * 1-5",
+      "notify_scheduling_group": true,
+      "message_template": "📊 **AgentFlow 每日调度播报**\n{{daily_summary}}"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "name": "agentflow",
+  "version": "1.0.0",
+  "description": "AgentFlow — 跨部门 AI 智能体编排平台",
+  "type": "module",
+  "scripts": {
+    "server": "AGENTFLOW_ROOT=$(pwd) node scripts/agentflow-server.mjs",
+    "mcp": "node mcp-servers/notify/server.js",
+    "push": "bash scripts/push-risk-summary.sh",
+    "launch": "bash scripts/launch-agents.sh",
+    "bot:all": "bash scripts/launch-feishu-bots.sh",
+    "bot:tester": "AGENT_ID=tester AGENT_NAME=\"Tester Bot\" FEISHU_APP_ID=$FEISHU_TESTER_APP_ID FEISHU_APP_SECRET=$FEISHU_TESTER_APP_SECRET node agents/feishu-bot.mjs",
+    "bot:dataanalyst": "AGENT_ID=dataanalyst AGENT_NAME=\"DataAnalyst Bot\" FEISHU_APP_ID=$FEISHU_DATAANALYST_APP_ID FEISHU_APP_SECRET=$FEISHU_DATAANALYST_APP_SECRET node agents/feishu-bot.mjs"
+  },
+  "dependencies": {
+    "@larksuiteoapi/node-sdk": "^1.61.0",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "express": "^5.2.1",
+    "node-fetch": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "agentflow-notify": {
+      "command": "node",
+      "args": ["/Users/a123/agent/agentflow/mcp-servers/notify/server.js"],
+      "env": {
+        "AGENTFLOW_ROOT": "/Users/a123/agent/agentflow"
+      }
+    },
+    "dingtalk-wiki": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://api.dingtalk.com/v1.0/gateway/instances/G-CONN-10380BEE4A6821671B34000I/sse"
+      ]
+    }
+  }
+}

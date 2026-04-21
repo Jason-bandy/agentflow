@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- macOS launchd 持久化调度（比 crontab 可靠）
+     安装：cp launchd-daily.plist ~/Library/LaunchAgents/com.agentflow.daily.plist
+           launchctl load ~/Library/LaunchAgents/com.agentflow.daily.plist
+     卸载：launchctl unload ~/Library/LaunchAgents/com.agentflow.daily.plist -->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.agentflow.daily</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/a123/agent/agentflow/scripts/push-risk-summary.sh</string>
+    </array>
+
+    <!-- 每天 9:03 触发 -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>9</integer>
+        <key>Minute</key>
+        <integer>3</integer>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/agentflow/launchd-out.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/agentflow/launchd-err.log</string>
+
+    <!-- 加载环境变量（从 .env 文件读取） -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <false/>
+</dict>
+</plist>

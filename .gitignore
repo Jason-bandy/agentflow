@@ -1,0 +1,13 @@
+# 敏感文件 - 绝对不提交
+.env
+*.env.local
+
+# 运行时产出
+/tmp/agentflow/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# macOS
+.DS_Store
