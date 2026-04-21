@@ -1,0 +1,41 @@
+# Ralph Progress Log
+Started: 2026-04-21
+---
+## Codebase Patterns
+- AgentFlow 使用 DONE:<AGENT> 标记实现 Agent 间依赖等待
+- 所有 Agent 产出统一写入 /tmp/agentflow/ 目录
+- sop-flow.jsonl 是 JSONL 格式，每行一个合法 JSON 对象
+- agents.json 中的现有 Agent（main, aftersale, sales 等）是通知系统配置，与 SOP 流程 Agent 是两套体系
+- launch-agents.sh 使用 tmux 窗口管理各 Agent，通过文件轮询实现依赖等待
+---
+## [2026-04-21] - US-001
+- Refactored sop-flow.jsonl from 6 steps to 14 steps across 5 phases
+- Added 10 new agents: id-agent, me-manager-agent, me-lead-agent, architect-agent, hw-lead-agent, hw-board-app-agent, fw-lead-agent, app-lead-agent, backend-agent, verification-agent, production-manager-agent
+- Updated existing agents: pm-agent (kept), hw-agent → hw-lead-agent, sw-agent → split into fw-lead + app-lead + backend, procurement-agent (updated trigger), qa-agent (expanded checks), prod-agent (removed, merged into pm-agent role)
+- Each agent has: trigger, depends_on, output_file, loop_mode defined
+- **Key design decisions:**
+  - Phase 1 (ID&ME) is serial: PM → ID → ME Manager → ME Lead
+  - Phase 2 (HW&PCB): Architect first, then HW Lead and HW Board App
+  - Phase 3 (Parallel Dev): FW depends on HW_LEAD + ARCHITECT; App/Backend depend on ARCHITECT; Procurement depends on HW_LEAD + ARCHITECT
+  - Phase 4 (Verification): Verification agent runs system-level checks; QA runs cross-validation
+  - Phase 5 (Production): Production manager depends on both VERIFICATION and QA
+- Files changed: config/sop-flow.jsonl
+- **Learnings for future iterations:**
+  - sop-flow.jsonl uses `depends_on` (agent IDs array) AND `depends_on_files` (file paths) for dual dependency tracking
+  - `next_agents` field defines which agents to notify on completion
+  - `next_trigger` is the DONE marker this agent produces
+  - Loop mode is enabled for design/dev agents that need to iterate; disabled for one-pass agents (procurement, qa, verification, production)
+  - The `phase` field was added to each step for better readability in launch script
+---
+## [2026-04-21] - US-014
+- Added notification channel placeholders for all 11 new SOP agents in .env.example
+- New DingTalk sections: ID, ME Manager, ME Lead, Architect, HW Lead, HW Board App, FW Lead, App Lead, Backend, Verification, Production
+- New Feishu sections: ID, ME Manager, ME Lead, Architect, HW Lead, HW Board App, FW Lead, App Lead, Backend, Verification, Production
+- Each agent has CLIENT_ID/APP_ID, CLIENT_SECRET/APP_SECRET, and MODEL placeholders
+- All placeholders annotated with `# TODO: 配置...` comments
+- Existing env vars (PM, AFTERSALE, SALES, HR, DATAANALYST, TESTER, MAIN, KINGDEE) preserved unchanged
+- Files changed: .env.example
+- **Learnings for future iterations:**
+  - Naming convention: DingTalk uses `<DEPT>_CLIENT_ID`, Feishu uses `<DEPT>_APP_ID`
+  - The HW Board App agent creates awkward env var names (e.g., `FEISHU_HW_BOARD_APP_APP_ID`) — consider renaming to `HW_BOARD` if this becomes confusing
+---
