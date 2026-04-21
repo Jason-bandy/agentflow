@@ -119,3 +119,14 @@ Started: 2026-04-21
   - Agent window names are shortened (hw-lead → "hw-lead", me-manager → "me-manager") — don't use the full agent-id suffix "-agent" for tmux window names
   - The production window triggers push-risk-summary.sh at the very end — ensure this script exists before running
 ---
+## [2026-04-21] - US-013
+- Rewrote CLAUDE.md to reflect new architecture: 14 agents across 5 phases (was 6 agents)
+- Updated directory structure to include scripts/ralph/ per-agent directories
+- Added Ralph integration section with commands
+- Updated workflow execution description to 5-phase flow with dependency details
+- Updated output files list from 7 to 16 files (all new agent outputs)
+- Updated agent configuration section to list all 14 SOP agents + legacy agents
+- Files changed: CLAUDE.md
+- **Learnings for future iterations:**
+  - CLAUDE.md output files section should be kept in sync with sop-flow.jsonl output_file fields — each step should have a corresponding output file entry
+---
