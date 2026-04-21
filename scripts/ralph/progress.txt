@@ -130,3 +130,16 @@ Started: 2026-04-21
 - **Learnings for future iterations:**
   - CLAUDE.md output files section should be kept in sync with sop-flow.jsonl output_file fields — each step should have a corresponding output file entry
 ---
+## [2026-04-21] - US-015
+- Static verification of complete 5-phase flow:
+  - 14 tmux windows created (pm, id, me-manager, me-lead, architect, hw-lead, hw-board, fw-lead, app-lead, backend, procurement, verification, qa-agent, production)
+  - 14 DONE markers produced by agents, 12 waited on (HW_BOARD and PRODUCTION are terminal — correctly not waited)
+  - 16 output files referenced in launch script matching sop-flow.jsonl definitions
+  - DAG validation: valid directed acyclic graph with no cycles
+  - Phase chain: Phase 1 (4 serial) → Phase 2 (3 serial) → Phase 3 (4 parallel) → Phase 4 (2 parallel) → Phase 5 (1)
+- Manual browser verification needed: N/A (no UI changes)
+- Runtime verification needed: actual Agent launch and DONE marker passing requires running launch-agents.sh with valid credentials
+- **Learnings for future iterations:**
+  - The launch script uses `claude --print` for inline prompts — this is a lightweight approach; for complex iterations, consider using the Ralph per-agent directories instead
+  - DONE marker naming uses underscores (e.g., DONE:ME_MANAGER) not hyphens — ensure consistency between sop-flow.jsonl next_trigger and launch script grep patterns
+---
