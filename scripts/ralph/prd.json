@@ -44,7 +44,7 @@
         "文件输出到 config/agents.json"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "依赖 US-001（需知道所有 Agent 的 ID 和角色）"
     },
     {

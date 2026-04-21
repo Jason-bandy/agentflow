@@ -39,3 +39,15 @@ Started: 2026-04-21
   - Naming convention: DingTalk uses `<DEPT>_CLIENT_ID`, Feishu uses `<DEPT>_APP_ID`
   - The HW Board App agent creates awkward env var names (e.g., `FEISHU_HW_BOARD_APP_APP_ID`) — consider renaming to `HW_BOARD` if this becomes confusing
 ---
+## [2026-04-21] - US-009
+- Added 14 new SOP agent entries to agents.json with notification routing, env var placeholders, and dependency chains
+- New agents: pm-agent, id-agent, me-manager-agent, me-lead-agent, architect-agent, hw-lead-agent, hw-board-app-agent, fw-lead-agent, app-lead-agent, backend-agent, procurement-agent, verification-agent, qa-agent, production-manager-agent
+- Each agent has: id/name/bot_name/description/channel/group_webhook/env/notifies/receives_from/task_label/owner
+- `notifies` and `receives_from` arrays mirror the SOP flow dependency chain from sop-flow.jsonl
+- All webhook URLs use `${DINGTALK_WEBHOOK_<DEPT>}` placeholders matching .env.example conventions
+- Existing agents (main, aftersale, sales, hr, productmanager, dataanalyst, tester, *-feishu) preserved unchanged
+- Files changed: config/agents.json
+- **Learnings for future iterations:**
+  - agents.json uses env field with key names like `DINGTALK_<DEPT>_CLIENT_ID` — the department name must match between agents.json, .env.example, and sop-flow.jsonl
+  - `alias_of` field is used for Feishu mirror entries (e.g., main-feishu aliases main) — new SOP agents currently DingTalk-only
+---
