@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 /**
- * 市场情报报告生成 + 推送脚本
+ * 市场情报报告生成 + 推送脚本（图文版）
  *
  * 流程：
- * 1. 调用 LLM（DashScope qwen3.6-plus）生成市场情报报告
- * 2. 推送到钉钉群 Webhook
+ * 1. 从 Amazon 搜索产品，提取产品图片 URL
+ * 2. 调用 LLM 生成市场情报报告
+ * 3. 将图片嵌入报告，推送图文消息到钉钉群
  *
  * 用法：node scripts/push-market-intel.js
  * 环境变量：ANTHROPIC_BASE_URL, ANTHROPIC_AUTH_TOKEN, ANTHROPIC_MODEL
@@ -36,7 +37,63 @@ const DINGTALK_WEBHOOK =
 const DINGTALK_SECRET = process.env.DINGTALK_SECRET || "";
 
 // ──────────────────────────────────────────────
-// LLM 调用（复用 server.js 的 DashScope 逻辑）
+// Amazon 图片提取
+// ──────────────────────────────────────────────
+
+const AMAZON_HEADERS = {
+  "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+  "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+  "Accept-Language": "en-US,en;q=0.9",
+};
+
+async function searchAmazonImages(keyword, maxItems = 4) {
+  const url = `https://www.amazon.com/s?k=${encodeURIComponent(keyword)}`;
+  try {
+    const res = await fetch(url, { headers: AMAZON_HEADERS, signal: AbortSignal.timeout(12000) });
+    const html = await res.text();
+
+    const images = [];
+    // 提取 s-image 标签的 src，并升级到高清
+    const imgRe = /<img[^>]*class="[^"]*s-image[^"]*"[^>]*src="([^"]+)"/g;
+    let m;
+    while ((m = imgRe.exec(html)) && images.length < maxItems) {
+      let src = m[1];
+      // 过滤掉小图标/广告图，只要产品图
+      if (src.includes("/images/I/") && !src.includes("/111") && !src.includes("/11++")) {
+        // 升级到高清：将 _AC_UY218_ 替换为 _AC_SL400_
+        src = src.replace(/_AC_UY\d+_/, "_AC_SL400_");
+        images.push(src);
+      }
+    }
+
+    return [...new Set(images)].slice(0, maxItems);
+  } catch (err) {
+    console.warn(`  [Amazon 搜索 "${keyword}" 失败] ${err.message}`);
+    return [];
+  }
+}
+
+async function collectProductImages() {
+  const searches = [
+    { query: "label+printer+thermal", label: "热门标签打印机" },
+    { query: "Phomemo+label+printer", label: "Phomemo" },
+    { query: "NIIMBOT+label+printer", label: "精臣" },
+    { query: "MUNBYN+thermal+printer", label: "Munbyn" },
+    { query: "HPRT+label+printer", label: "汉印" },
+  ];
+
+  const results = await Promise.all(
+    searches.map(async (s) => ({
+      label: s.label,
+      images: await searchAmazonImages(s.query, 3),
+    }))
+  );
+
+  return results.filter((r) => r.images.length > 0);
+}
+
+// ──────────────────────────────────────────────
+// LLM 调用
 // ──────────────────────────────────────────────
 
 async function callDashScope({ model, systemPrompt, userPrompt }) {
@@ -45,10 +102,9 @@ async function callDashScope({ model, systemPrompt, userPrompt }) {
   if (!baseUrl || !token) throw new Error("缺少 ANTHROPIC_BASE_URL 或 ANTHROPIC_AUTH_TOKEN");
 
   const resolvedModel = model || process.env.ANTHROPIC_MODEL || "qwen3.6-plus";
-
   const body = {
     model: resolvedModel,
-    max_tokens: 4096,
+    max_tokens: 3000,
     messages: [{ role: "user", content: userPrompt }],
     ...(systemPrompt ? { system: systemPrompt } : {}),
   };
@@ -69,7 +125,6 @@ async function callDashScope({ model, systemPrompt, userPrompt }) {
   }
 
   const data = await res.json();
-  // DashScope 返回 content 数组：thinking 块在前，text 块在后
   const textBlock = data.content?.find((c) => c.type === "text");
   return textBlock?.text ?? "";
 }
@@ -91,7 +146,7 @@ async function callOpenClawGateway({ model, systemPrompt, userPrompt }) {
         ...(systemPrompt ? [{ role: "system", content: systemPrompt }] : []),
         { role: "user", content: userPrompt },
       ],
-      max_tokens: 4096,
+      max_tokens: 3000,
     }),
   });
 
@@ -161,61 +216,76 @@ const DATE_STR = TODAY.toLocaleDateString("zh-CN", {
 async function main() {
   console.log(`[${new Date().toISOString()}] 开始生成市场情报报告...`);
 
-  // 调用 LLM 生成报告
-  console.log("  [1/2] 生成市场情报报告...");
-  const systemPrompt = `你是资深电商市场分析师，专注打印机/标签打印机品类。你擅长分析 Amazon 等电商平台的销售数据、用户评价和竞品动态。
+  // 1. 并行搜索 Amazon 图片 + LLM 生成报告
+  console.log("  [1/2] 搜索 Amazon 图片 + 生成报告...");
+  const [productImages, reportContent] = await Promise.all([
+    collectProductImages(),
+    callLLM({
+      model: process.env.ANTHROPIC_MODEL || "qwen3.6-plus",
+      systemPrompt: `你是资深电商市场分析师，专注打印机/标签打印机品类。
+请生成一份精简的 Markdown 格式市场情报日报，适合钉钉群展示。
 
-请生成一份简洁的 Markdown 格式市场情报日报，适合在钉钉群中展示。
-
-报告必须包含以下板块（用 emoji 标题分隔）：
+报告必须包含以下板块：
 
 ## 🔥 爆款追踪
-- Amazon 等平台上热销 TOP10 标签打印机型号
-- 价格区间分布
-- 用户评分分析
+- Amazon 热销标签打印机 TOP5（型号、价格、评分）
 - 近期促销动态
 
 ## 🆕 新款发布
-- 近 30 天内标签打印机新品动态
-- 功能亮点
-- 定价策略
-- 市场定位
+- 近 30 天新品动态（型号、功能亮点、定价）
 
 ## 🏪 卖家情报
-- Top 10 标签打印机卖家资料
-- 月销量估算
-- 产品线分析
-- 运营特点
+- Top 5 卖家（名称、月销估算、运营特点）
 
 ## ⚔️ 竞品对标
-- Phomemo（爱印）/ 汉印(HPRT) / Munbyn / 精臣(Niimbot) 最新表现
-- 鹿匠的机会点分析
+- Phomemo / 汉印 / Munbyn / 精臣 最新表现
+- 鹿匠的机会点
 
 ## 💡 鹿匠行动建议
 - 2-3 条可执行建议
 
 格式要求：
-- 用 Markdown 表格展示数据
-- 简洁精炼，每个板块不超过 200 字
-- 数据要具体（具体型号、价格、评分）
-- 不确定的数据标注"待确认"`;
+- 用 Markdown 表格
+- 每个板块精简到 100 字以内
+- 数据要具体
+- 不确定的标注"待确认"`,
+      userPrompt: `请生成今天的市场情报日报（${DATE_STR}）。`,
+    }),
+  ]);
 
-  const userPrompt = `请生成今天的市场情报日报（${DATE_STR}）。基于你掌握的最新的电商数据和行业知识，分析标签打印机品类的市场动态。`;
+  // 2. 嵌入产品图片
+  console.log("  [2/2] 嵌入产品图片并推送...");
+  const imageMap = Object.fromEntries(productImages.map((p) => [p.label, p.images]));
 
-  const reportContent = await callLLM({
-    model: process.env.ANTHROPIC_MODEL || "qwen3.6-plus",
-    systemPrompt,
-    userPrompt,
-  });
+  let fullReport = reportContent;
+  const imageSections = [];
 
-  // 推送到钉钉
-  console.log("  [2/2] 推送报告到钉钉群...");
+  for (const [label, images] of Object.entries(imageMap)) {
+    if (images.length > 0) {
+      // 钉钉 markdown 中图片用标准 ![alt](url) 语法
+      const imgMarkdown = images.slice(0, 2).map((u) => `![](${u})`).join("\n");
+      imageSections.push(`**${label}**\n${imgMarkdown}`);
+    }
+  }
+
+  if (imageSections.length > 0) {
+    const gallerySection = `\n\n---\n\n## 📸 Amazon 热门产品实拍\n${imageSections.join("\n\n")}`;
+    // 插入到报告末尾
+    fullReport += gallerySection;
+  }
+
+  // 控制总大小（钉钉 markdown 限制约 20KB）
+  if (fullReport.length > 18000) {
+    fullReport = fullReport.slice(0, 17500) + "\n\n...（内容过长已截断）";
+  }
+
+  // 推送
   const title = `📊 打印机市场情报日报 - ${DATE_STR}`;
   const result = await sendDingtalkWebhook({
     webhookUrl: DINGTALK_WEBHOOK,
     secret: DINGTALK_SECRET,
     title,
-    content: reportContent,
+    content: fullReport,
   });
 
   console.log(`[${new Date().toISOString()}] ✅ 推送完成: ${JSON.stringify(result)}`);
