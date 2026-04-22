@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:github.com)",
+      "mcp__agentflow-notify__notify_agent",
+      "WebSearch",
+      "WebFetch(domain:opensource.dingtalk.com)"
+    ]
+  },
+  "enabledMcpjsonServers": [
+    "agentflow-notify",
+    "dingtalk-wiki"
+  ]
+}
