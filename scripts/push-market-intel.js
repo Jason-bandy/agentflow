@@ -34,7 +34,13 @@ if (fs.existsSync(envFile)) {
 const DINGTALK_WEBHOOK =
   process.env.MARKET_INTEL_WEBHOOK ||
   "https://oapi.dingtalk.com/robot/send?access_token=bda6e530beab15f6a363178e4e836711c9e6c4d65afee5e8d52352b12db183af";
+const DINGTALK_WEBHOOK_SECONDARY =
+  "https://oapi.dingtalk.com/robot/send?access_token=5f8917250a3d6c57e5d035948f70bf108a1e6ad6c5fc6ac7154ff5c8cf8ec99f";
 const DINGTALK_SECRET = process.env.DINGTALK_SECRET || "";
+const DINGTALK_WEBHOOKS = [
+  { url: DINGTALK_WEBHOOK, label: "主群" },
+  { url: DINGTALK_WEBHOOK_SECONDARY, label: "副群" },
+];
 
 // ──────────────────────────────────────────────
 // Amazon 图片提取
@@ -279,16 +285,21 @@ async function main() {
     fullReport = fullReport.slice(0, 17500) + "\n\n...（内容过长已截断）";
   }
 
-  // 推送
+  // 推送到两个钉钉群（单个失败不阻断其他）
   const title = `📊 打印机市场情报日报 - ${DATE_STR}`;
-  const result = await sendDingtalkWebhook({
-    webhookUrl: DINGTALK_WEBHOOK,
-    secret: DINGTALK_SECRET,
-    title,
-    content: fullReport,
-  });
-
-  console.log(`[${new Date().toISOString()}] ✅ 推送完成: ${JSON.stringify(result)}`);
+  for (const { url, label } of DINGTALK_WEBHOOKS) {
+    try {
+      const result = await sendDingtalkWebhook({
+        webhookUrl: url,
+        secret: DINGTALK_SECRET,
+        title,
+        content: fullReport,
+      });
+      console.log(`[${new Date().toISOString()}] ✅ 推送完成 [${label}]: ${JSON.stringify(result)}`);
+    } catch (err) {
+      console.error(`[${new Date().toISOString()}] ⚠️ 推送失败 [${label}]: ${err.message}`);
+    }
+  }
 }
 
 main().catch((err) => {
