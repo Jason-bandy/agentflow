@@ -108,7 +108,9 @@ async function callDashScope({ model, systemPrompt, userPrompt }) {
   }
 
   const data = await res.json();
-  return data.content?.[0]?.text ?? "";
+  // DashScope 返回 content 数组：thinking 块在前，text 块在后
+  const textBlock = data.content?.find((c) => c.type === "text");
+  return textBlock?.text ?? "";
 }
 
 /**
