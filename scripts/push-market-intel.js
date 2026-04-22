@@ -1,14 +1,12 @@
 #!/usr/bin/env node
 /**
- * 市场情报报告生成 + 推送脚本（图文版）
+ * 市场情报报告生成 + 推送脚本（图文嵌套版 v3）
  *
- * 流程：
- * 1. 从 Amazon 搜索产品，提取产品图片 URL
- * 2. 调用 LLM 生成市场情报报告
- * 3. 将图片嵌入报告，推送图文消息到钉钉群
+ * 1. LLM 生成报告（多表格 + 多文字）
+ * 2. Amazon 提取产品小图嵌入
+ * 3. 推送至单群测试（成功后再开双群）
  *
  * 用法：node scripts/push-market-intel.js
- * 环境变量：ANTHROPIC_BASE_URL, ANTHROPIC_AUTH_TOKEN, ANTHROPIC_MODEL
  */
 
 import crypto from "crypto";
@@ -19,10 +17,6 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 
-// ──────────────────────────────────────────────
-// 环境变量
-// ──────────────────────────────────────────────
-
 const envFile = path.join(ROOT, ".env");
 if (fs.existsSync(envFile)) {
   for (const line of fs.readFileSync(envFile, "utf-8").split("\n")) {
@@ -31,19 +25,34 @@ if (fs.existsSync(envFile)) {
   }
 }
 
+// 仅主群（测试通过后再开副群）
 const DINGTALK_WEBHOOK =
   process.env.MARKET_INTEL_WEBHOOK ||
   "https://oapi.dingtalk.com/robot/send?access_token=bda6e530beab15f6a363178e4e836711c9e6c4d65afee5e8d52352b12db183af";
-const DINGTALK_WEBHOOK_SECONDARY =
-  "https://oapi.dingtalk.com/robot/send?access_token=5f8917250a3d6c57e5d035948f70bf108a1e6ad6c5fc6ac7154ff5c8cf8ec99f";
+const DINGTALK_WEBHOOKS = [{ url: DINGTALK_WEBHOOK, label: "主群" }];
 const DINGTALK_SECRET = process.env.DINGTALK_SECRET || "";
-const DINGTALK_WEBHOOKS = [
-  { url: DINGTALK_WEBHOOK, label: "主群" },
-  { url: DINGTALK_WEBHOOK_SECONDARY, label: "副群" },
-];
 
 // ──────────────────────────────────────────────
-// Amazon 图片提取
+// 首席市场官知识库
+// ──────────────────────────────────────────────
+
+const MARKET_REPORTS_DIR = process.env.MARKET_REPORTS_DIR ||
+  path.join(process.env.HOME, ".openclaw/workspace-market/reports");
+
+function saveReportToKnowledgeBase(content, dateStr) {
+  // 确保目录存在
+  fs.mkdirSync(MARKET_REPORTS_DIR, { recursive: true });
+
+  // 文件名：market-intel-YYYY-MM-DD.md
+  const datePart = new Date().toISOString().split("T")[0];
+  const filePath = path.join(MARKET_REPORTS_DIR, `market-intel-${datePart}.md`);
+  fs.writeFileSync(filePath, content, "utf-8");
+  console.log(`  📄 报告已保存至知识库: ${filePath}`);
+  return filePath;
+}
+
+// ──────────────────────────────────────────────
+// Amazon 产品提取（小图 + 名称）
 // ──────────────────────────────────────────────
 
 const AMAZON_HEADERS = {
@@ -52,34 +61,46 @@ const AMAZON_HEADERS = {
   "Accept-Language": "en-US,en;q=0.9",
 };
 
-async function searchAmazonImages(keyword, maxItems = 4) {
+async function searchAmazonProducts(keyword, maxItems = 4) {
   const url = `https://www.amazon.com/s?k=${encodeURIComponent(keyword)}`;
   try {
     const res = await fetch(url, { headers: AMAZON_HEADERS, signal: AbortSignal.timeout(12000) });
     const html = await res.text();
 
-    const images = [];
-    // 提取 s-image 标签的 src，并升级到高清
-    const imgRe = /<img[^>]*class="[^"]*s-image[^"]*"[^>]*src="([^"]+)"/g;
+    const titles = [];
+    const titleRe = /<span[^>]*class="[^"]*a-text-normal[^"]*"[^>]*>([\s\S]*?)<\/span>/gi;
     let m;
-    while ((m = imgRe.exec(html)) && images.length < maxItems) {
-      let src = m[1];
-      // 过滤掉小图标/广告图，只要产品图
+    while ((m = titleRe.exec(html))) {
+      const text = m[1].replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+      if (text.length > 8 && !text.startsWith("Sponsored")) titles.push(text);
+    }
+
+    const images = [];
+    const imgRe = /<img[^>]*class="[^"]*s-image[^"]*"[^>]*src="([^"]+)"/g;
+    while ((m = imgRe.exec(html))) {
+      const src = m[1];
       if (src.includes("/images/I/") && !src.includes("/111") && !src.includes("/11++")) {
-        // 升级到高清：将 _AC_UY218_ 替换为 _AC_SL400_
-        src = src.replace(/_AC_UY\d+_/, "_AC_SL400_");
-        images.push(src);
+        // AC_UL160_ 小尺寸，钉钉渲染时不会太大，清晰度高
+        images.push(src.replace(/_AC_UY\d+_/, "_AC_UL160_"));
       }
     }
 
-    return [...new Set(images)].slice(0, maxItems);
+    const products = [];
+    for (let i = 0; i < Math.min(maxItems, titles.length, images.length); i++) {
+      // 截断标题避免过长
+      products.push({
+        title: titles[i].slice(0, 80),
+        image: images[i],
+      });
+    }
+    return products;
   } catch (err) {
-    console.warn(`  [Amazon 搜索 "${keyword}" 失败] ${err.message}`);
+    console.warn(`  [Amazon "${keyword}"] ${err.message}`);
     return [];
   }
 }
 
-async function collectProductImages() {
+async function collectProducts() {
   const searches = [
     { query: "label+printer+thermal", label: "热门标签打印机" },
     { query: "Phomemo+label+printer", label: "Phomemo" },
@@ -91,11 +112,10 @@ async function collectProductImages() {
   const results = await Promise.all(
     searches.map(async (s) => ({
       label: s.label,
-      images: await searchAmazonImages(s.query, 3),
+      products: await searchAmazonProducts(s.query, 3),
     }))
   );
-
-  return results.filter((r) => r.images.length > 0);
+  return results.filter((r) => r.products.length > 0);
 }
 
 // ──────────────────────────────────────────────
@@ -110,7 +130,7 @@ async function callDashScope({ model, systemPrompt, userPrompt }) {
   const resolvedModel = model || process.env.ANTHROPIC_MODEL || "qwen3.6-plus";
   const body = {
     model: resolvedModel,
-    max_tokens: 3000,
+    max_tokens: 4096,
     messages: [{ role: "user", content: userPrompt }],
     ...(systemPrompt ? { system: systemPrompt } : {}),
   };
@@ -152,7 +172,7 @@ async function callOpenClawGateway({ model, systemPrompt, userPrompt }) {
         ...(systemPrompt ? [{ role: "system", content: systemPrompt }] : []),
         { role: "user", content: userPrompt },
       ],
-      max_tokens: 3000,
+      max_tokens: 4096,
     }),
   });
 
@@ -222,83 +242,90 @@ const DATE_STR = TODAY.toLocaleDateString("zh-CN", {
 async function main() {
   console.log(`[${new Date().toISOString()}] 开始生成市场情报报告...`);
 
-  // 1. 并行搜索 Amazon 图片 + LLM 生成报告
-  console.log("  [1/2] 搜索 Amazon 图片 + 生成报告...");
-  const [productImages, reportContent] = await Promise.all([
-    collectProductImages(),
-    callLLM({
-      model: process.env.ANTHROPIC_MODEL || "qwen3.6-plus",
-      systemPrompt: `你是资深电商市场分析师，专注打印机/标签打印机品类。
-请生成一份精简的 Markdown 格式市场情报日报，适合钉钉群展示。
+  // 1. 获取 Amazon 产品数据
+  console.log("  [1/3] 搜索 Amazon 产品...");
+  const productData = await collectProducts();
+
+  // 2. LLM 生成报告（多表格 + 多文字分析）
+  console.log("  [2/3] 生成报告...");
+  const reportContent = await callLLM({
+    model: process.env.ANTHROPIC_MODEL || "qwen3.6-plus",
+    systemPrompt: `你是资深电商市场分析师，专注标签打印机品类。
+请生成一份详细的市场情报日报，文字分析要多，表格要多。
 
 报告必须包含以下板块：
 
 ## 🔥 爆款追踪
-- Amazon 热销标签打印机 TOP5（型号、价格、评分）
-- 近期促销动态
+- 用表格列出 Amazon 热销 TOP10（型号、价格、评分、月销估算、近7日变化）
+- 分析价格带分布（$20-50 / $50-100 / $100+ 占比）
+- 列出近期促销动态（Coupon、Deal、站外推广）
 
 ## 🆕 新款发布
-- 近 30 天新品动态（型号、功能亮点、定价）
+- 用表格列出近 30 天新品（品牌、型号、核心功能、定价、上市时间）
+- 分析新品功能趋势（连接方式、打印速度、特殊功能）
+- 定价策略对比
 
 ## 🏪 卖家情报
-- Top 5 卖家（名称、月销估算、运营特点）
+- 用表格列出 Top 10 卖家（店铺名、月销估算、主力品类、运营特点、增长趋势）
+- 分析头部卖家的运营模式差异
 
 ## ⚔️ 竞品对标
-- Phomemo / 汉印 / Munbyn / 精臣 最新表现
-- 鹿匠的机会点
+- 用表格对比 Phomemo / 汉印(HPRT) / Munbyn / 精臣(Niimbot)
+  （品牌、核心价位段、月销、主销市场、优势、短板）
+- 分析鹿匠的机会点和差异化方向
 
 ## 💡 鹿匠行动建议
-- 2-3 条可执行建议
+- 3-5 条可执行建议（具体到品类、价格段、渠道、动作）
 
 格式要求：
-- 用 Markdown 表格
-- 每个板块精简到 100 字以内
-- 数据要具体
-- 不确定的标注"待确认"`,
-      userPrompt: `请生成今天的市场情报日报（${DATE_STR}）。`,
-    }),
-  ]);
+- 每个板块先用一段话总结核心发现
+- 再用表格展示数据
+- 最后用列表补充细节
+- 不确定的数据标注"待确认"
+- 使用钉钉支持的 Markdown：|表格|、**加粗**、-列表、![alt](url)`,
+    userPrompt: `请生成今天的市场情报日报（${DATE_STR}）。`,
+  });
 
-  // 2. 嵌入产品图片
-  console.log("  [2/2] 嵌入产品图片并推送...");
-  const imageMap = Object.fromEntries(productImages.map((p) => [p.label, p.images]));
+  // 3. 图文嵌套排版：在每个品类板块后插入产品图片
+  console.log("  [3/3] 图文嵌套 + 推送...");
+
+  // 先插入产品图文卡片到报告末尾
+  const productCards = [];
+  for (const { label, products } of productData) {
+    if (products.length === 0) continue;
+    // 每个品牌展示 2-3 个产品，图片在上、名称在下
+    const cards = products
+      .slice(0, 2)
+      .map((p) => `![${p.title}](${p.image})\n\n${p.title}`)
+      .join("\n\n");
+    productCards.push(`### 📷 ${label} 热门产品\n\n${cards}`);
+  }
 
   let fullReport = reportContent;
-  const imageSections = [];
-
-  for (const [label, images] of Object.entries(imageMap)) {
-    if (images.length > 0) {
-      // 钉钉 markdown 中图片用标准 ![alt](url) 语法
-      const imgMarkdown = images.slice(0, 2).map((u) => `![](${u})`).join("\n");
-      imageSections.push(`**${label}**\n${imgMarkdown}`);
-    }
+  if (productCards.length > 0) {
+    fullReport += `\n\n---\n\n## 📸 Amazon 热门产品实拍\n\n${productCards.join("\n\n")}`;
   }
 
-  if (imageSections.length > 0) {
-    const gallerySection = `\n\n---\n\n## 📸 Amazon 热门产品实拍\n${imageSections.join("\n\n")}`;
-    // 插入到报告末尾
-    fullReport += gallerySection;
+  // 控制大小
+  if (fullReport.length > 15000) {
+    fullReport = fullReport.slice(0, 14500) + "\n\n...（内容过长已截断）";
   }
 
-  // 控制总大小（钉钉 markdown 限制约 20KB）
-  if (fullReport.length > 18000) {
-    fullReport = fullReport.slice(0, 17500) + "\n\n...（内容过长已截断）";
-  }
+  console.log(`  报告长度: ${fullReport.length} 字符`);
 
-  // 推送到两个钉钉群（单个失败不阻断其他）
+  // 保存至首席市场官知识库
+  saveReportToKnowledgeBase(fullReport, DATE_STR);
+
+  // 推送
   const title = `📊 打印机市场情报日报 - ${DATE_STR}`;
   for (const { url, label } of DINGTALK_WEBHOOKS) {
-    try {
-      const result = await sendDingtalkWebhook({
-        webhookUrl: url,
-        secret: DINGTALK_SECRET,
-        title,
-        content: fullReport,
-      });
-      console.log(`[${new Date().toISOString()}] ✅ 推送完成 [${label}]: ${JSON.stringify(result)}`);
-    } catch (err) {
-      console.error(`[${new Date().toISOString()}] ⚠️ 推送失败 [${label}]: ${err.message}`);
-    }
+    const result = await sendDingtalkWebhook({
+      webhookUrl: url,
+      secret: DINGTALK_SECRET,
+      title,
+      content: fullReport,
+    });
+    console.log(`[${new Date().toISOString()}] ✅ 推送完成 [${label}]`);
   }
 }
 
