@@ -13,12 +13,25 @@
     "bot:dataanalyst": "AGENT_ID=dataanalyst AGENT_NAME=\"DataAnalyst Bot\" FEISHU_APP_ID=$FEISHU_DATAANALYST_APP_ID FEISHU_APP_SECRET=$FEISHU_DATAANALYST_APP_SECRET node agents/feishu-bot.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.91.1",
     "@larksuiteoapi/node-sdk": "^1.61.0",
     "@modelcontextprotocol/sdk": "^1.0.0",
+    "axios": "^1.15.2",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "node-fetch": "^3.0.0"
+    "node-fetch": "^3.0.0",
+    "sqlite3": "^6.0.1"
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
+    "eslint": "^10.2.1",
+    "jest": "^30.3.0",
+    "prettier": "^3.8.3",
+    "ts-jest": "^29.4.9",
+    "ts-node": "^10.9.2"
   }
 }
