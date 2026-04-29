@@ -139,3 +139,4 @@ crontab -e
 - **金蝶 ERP**：在采购 Agent 中调用金蝶 API 获取实时库存/价格
 - **Excel 监控**：将 Excel 表格上传后，Agent 提取时间节点自动监控
 - **MCP 扩展**：为每个外部系统创建独立 MCP Server 并注册到 Claude
+# agentflow
